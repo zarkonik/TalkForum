@@ -1,0 +1,50 @@
+.group-card {
+  display: block;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  color: var(--color-text);
+}
+
+.group-card:hover {
+  border-color: var(--color-primary);
+  text-decoration: none;
+}
+
+.group-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.group-card__name {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.group-card__badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.group-card__description {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.group-card__meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
