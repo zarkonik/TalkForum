@@ -126,6 +126,11 @@ button {
   font-weight: 500;
 }
 
+.form-error__list {
+  margin: 0;
+  padding-left: 18px;
+}
+
 .page-container {
   max-width: 900px;
   width: 100%;

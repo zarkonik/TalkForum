@@ -25,3 +25,7 @@ public record EnableTwoFactorResponse(IEnumerable<string> RecoveryCodes);
 public record RegenerateRecoveryCodesRequest(string Code);
 
 public record VerifyRecoveryCodeRequest(string ChallengeToken, string RecoveryCode);
+
+public record ForgotPasswordRequest(string Email);
+
+public record ResetPasswordRequest(string Email, string Token, string NewPassword);

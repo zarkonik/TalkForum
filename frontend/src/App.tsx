@@ -6,6 +6,8 @@ import { ProtectedRoute } from "./auth/ProtectedRoute/ProtectedRoute";
 import { Layout } from "./components/Layout/Layout";
 import { LoginPage } from "./pages/LoginPage/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage/RegisterPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage/ResetPasswordPage";
 import { GroupsListPage } from "./pages/GroupsListPage/GroupsListPage";
 import { MyGroupsPage } from "./pages/MyGroupsPage/MyGroupsPage";
 import { DiscoveryPage } from "./pages/DiscoveryPage/DiscoveryPage";
@@ -29,6 +31,8 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route
                 element={
                   <ProtectedRoute>
