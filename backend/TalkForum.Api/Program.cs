@@ -6,11 +6,13 @@ using Microsoft.IdentityModel.Tokens;
 using TalkForum.Api.Auth;
 using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure;
+using TalkForum.Infrastructure.Admin;
 using TalkForum.Infrastructure.Auth;
 using TalkForum.Infrastructure.Groups;
 using TalkForum.Infrastructure.Leaderboard;
 using TalkForum.Infrastructure.Notifications;
 using TalkForum.Infrastructure.Posts;
+using TalkForum.Infrastructure.Reports;
 using TalkForum.Infrastructure.Users;
 
 Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars"));
@@ -49,6 +51,8 @@ builder.Services.AddScoped<PostsService>();
 builder.Services.AddScoped<CommentsService>();
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<LeaderboardService>();
+builder.Services.AddScoped<AdminService>();
+builder.Services.AddScoped<ReportsService>();
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration section missing.");
@@ -94,10 +98,20 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
 
-    using var scope = app.Services.CreateScope();
+using (var scope = app.Services.CreateScope())
+{
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+
+    const string platformAdminEmail = "zax.nix1@gmail.com";
+    var platformAdmin = await db.Users.FirstOrDefaultAsync(u => u.Email == platformAdminEmail);
+    if (platformAdmin is not null && !platformAdmin.IsPlatformAdmin)
+    {
+        platformAdmin.IsPlatformAdmin = true;
+        await db.SaveChangesAsync();
+    }
 }
 
 app.UseHttpsRedirection();

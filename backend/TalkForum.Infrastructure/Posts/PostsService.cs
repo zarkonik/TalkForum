@@ -158,6 +158,19 @@ public class PostsService
         return ServiceResult.Ok();
     }
 
+    public async Task<ServiceResult> AdminDeleteAsync(Guid postId)
+    {
+        var post = await _db.Posts.FindAsync(postId);
+        if (post is null)
+        {
+            return ServiceResult.Fail(ServiceErrorType.NotFound, "Post not found.");
+        }
+
+        _db.Posts.Remove(post);
+        await _db.SaveChangesAsync();
+        return ServiceResult.Ok();
+    }
+
     public async Task<ServiceResult<LikeStatusDto>> ToggleLikeAsync(Guid userId, Guid postId)
     {
         var post = await _db.Posts.FindAsync(postId);

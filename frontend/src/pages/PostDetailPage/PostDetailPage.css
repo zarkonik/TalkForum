@@ -101,6 +101,9 @@
 }
 
 .post-detail__like {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   margin-top: 16px;
 }
 

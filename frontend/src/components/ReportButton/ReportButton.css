@@ -1,0 +1,17 @@
+.report-button {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.report-button:hover {
+  color: var(--color-error);
+}
+
+.report-button:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}

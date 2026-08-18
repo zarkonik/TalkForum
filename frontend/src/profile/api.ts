@@ -19,3 +19,31 @@ export async function uploadAvatar(file: File): Promise<User> {
   });
   return data;
 }
+
+export interface TwoFactorSetup {
+  sharedKey: string;
+  authenticatorUri: string;
+}
+
+export async function setupTwoFactor(): Promise<TwoFactorSetup> {
+  const { data } = await apiClient.get<TwoFactorSetup>("/api/auth/2fa/setup");
+  return data;
+}
+
+export interface RecoveryCodesResponse {
+  recoveryCodes: string[];
+}
+
+export async function enableTwoFactor(code: string): Promise<RecoveryCodesResponse> {
+  const { data } = await apiClient.post<RecoveryCodesResponse>("/api/auth/2fa/enable", { code });
+  return data;
+}
+
+export async function disableTwoFactor(code: string): Promise<void> {
+  await apiClient.post("/api/auth/2fa/disable", { code });
+}
+
+export async function regenerateRecoveryCodes(code: string): Promise<RecoveryCodesResponse> {
+  const { data } = await apiClient.post<RecoveryCodesResponse>("/api/auth/2fa/recovery-codes/regenerate", { code });
+  return data;
+}

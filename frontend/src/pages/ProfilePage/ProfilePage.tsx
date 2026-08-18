@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
+import { TwoFactorSetup } from "../../components/TwoFactorSetup/TwoFactorSetup";
 import { resolveAvatarUrl } from "../../lib/avatar";
 import { updateDisplayName, uploadAvatar } from "../../profile/api";
 import "./ProfilePage.css";
@@ -101,6 +102,8 @@ export function ProfilePage() {
         {avatarMutation.isPending && <p>Uploading...</p>}
         {avatarError && <p className="form-error">{avatarError}</p>}
       </div>
+
+      {user?.isPlatformAdmin && <TwoFactorSetup />}
     </div>
   );
 }

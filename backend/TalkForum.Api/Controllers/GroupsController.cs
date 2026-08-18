@@ -32,6 +32,13 @@ public class GroupsController : ControllerBase
         return Ok(groups);
     }
 
+    [HttpGet("mine")]
+    public async Task<ActionResult<IEnumerable<GroupSummaryDto>>> GetMine()
+    {
+        var groups = await _groupsService.GetMyGroupsAsync(User.GetUserId());
+        return Ok(groups);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<GroupSummaryDto>> GetById(Guid id)
     {

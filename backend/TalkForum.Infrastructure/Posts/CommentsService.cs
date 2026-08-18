@@ -114,6 +114,24 @@ public class CommentsService
             return ServiceResult.Fail(ServiceErrorType.Forbidden, "You can only delete your own comments.");
         }
 
+        await DeleteWithRepliesAsync(comment);
+        return ServiceResult.Ok();
+    }
+
+    public async Task<ServiceResult> AdminDeleteAsync(Guid commentId)
+    {
+        var comment = await _db.Comments.FindAsync(commentId);
+        if (comment is null)
+        {
+            return ServiceResult.Fail(ServiceErrorType.NotFound, "Comment not found.");
+        }
+
+        await DeleteWithRepliesAsync(comment);
+        return ServiceResult.Ok();
+    }
+
+    private async Task DeleteWithRepliesAsync(Comment comment)
+    {
         var postComments = await _db.Comments.Where(c => c.PostId == comment.PostId).ToListAsync();
         var toDelete = new List<Comment> { comment };
         var queue = new Queue<Guid>();
@@ -131,7 +149,6 @@ public class CommentsService
 
         _db.Comments.RemoveRange(toDelete);
         await _db.SaveChangesAsync();
-        return ServiceResult.Ok();
     }
 
     public async Task<ServiceResult<IEnumerable<CommentDto>>> GetByPostAsync(Guid userId, Guid postId)

@@ -115,6 +115,41 @@ public class GroupsService
         });
     }
 
+    public async Task<IEnumerable<GroupSummaryDto>> GetMyGroupsAsync(Guid userId)
+    {
+        var myMemberships = await _db.GroupMemberships
+            .Where(m => m.UserId == userId && m.Status == MembershipStatus.Approved)
+            .ToListAsync();
+
+        var groupIds = myMemberships.Select(m => m.GroupId).ToList();
+
+        var groups = await _db.Groups
+            .Include(g => g.Category)
+            .Where(g => groupIds.Contains(g.Id))
+            .ToListAsync();
+
+        var memberCounts = await _db.GroupMemberships
+            .Where(m => groupIds.Contains(m.GroupId) && m.Status == MembershipStatus.Approved)
+            .GroupBy(m => m.GroupId)
+            .Select(g => new { GroupId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.GroupId, x => x.Count);
+
+        var membershipsByGroup = myMemberships.ToDictionary(m => m.GroupId);
+
+        return groups
+            .OrderByDescending(g => membershipsByGroup[g.Id].Role)
+            .ThenByDescending(g => g.CreatedAt)
+            .Select(g =>
+            {
+                var membership = membershipsByGroup[g.Id];
+                memberCounts.TryGetValue(g.Id, out var count);
+
+                return new GroupSummaryDto(
+                    g.Id, g.Name, g.Slug, g.Description, g.CategoryId, g.Category!.Name,
+                    g.ParentGroupId, count, g.CreatedAt, membership.Status, membership.Role);
+            });
+    }
+
     public async Task<ServiceResult<GroupSummaryDto>> GetByIdAsync(Guid userId, Guid groupId)
     {
         var group = await _db.Groups.Include(g => g.Category).FirstOrDefaultAsync(g => g.Id == groupId);
@@ -266,6 +301,19 @@ public class GroupsService
             : NotificationType.GroupMembershipRejected;
         await _notificationsService.NotifyAsync(targetUserId, decidingUserId, notificationType, groupId);
 
+        return ServiceResult.Ok();
+    }
+
+    public async Task<ServiceResult> AdminDeleteGroupAsync(Guid groupId)
+    {
+        var group = await _db.Groups.FindAsync(groupId);
+        if (group is null)
+        {
+            return ServiceResult.Fail(ServiceErrorType.NotFound, "Group not found.");
+        }
+
+        _db.Groups.Remove(group);
+        await _db.SaveChangesAsync();
         return ServiceResult.Ok();
     }
 

@@ -1,0 +1,13 @@
+.my-groups-page__grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.my-groups-page__empty {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 48px 0;
+}

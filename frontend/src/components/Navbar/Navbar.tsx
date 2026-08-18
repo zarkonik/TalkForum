@@ -27,6 +27,14 @@ export function Navbar() {
       </div>
 
       <div className="navbar__user">
+        <Link to="/my-groups" className="navbar__link">
+          My groups
+        </Link>
+        {user?.isPlatformAdmin && (
+          <Link to="/admin" className="navbar__link">
+            Admin
+          </Link>
+        )}
         <NotificationBell />
         <Link to="/profile" className="navbar__avatar-link">
           {avatarUrl ? (

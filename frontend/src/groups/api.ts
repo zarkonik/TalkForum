@@ -11,6 +11,11 @@ export async function fetchGroups(params: { categoryId?: string; search?: string
   return data;
 }
 
+export async function fetchMyGroups(): Promise<Group[]> {
+  const { data } = await apiClient.get<Group[]>("/api/groups/mine");
+  return data;
+}
+
 export async function fetchGroup(id: string): Promise<Group> {
   const { data } = await apiClient.get<Group>(`/api/groups/${id}`);
   return data;
