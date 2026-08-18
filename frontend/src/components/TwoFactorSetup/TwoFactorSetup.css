@@ -1,0 +1,80 @@
+.two-factor-setup {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.two-factor-setup__title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.two-factor-setup__status {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+
+.two-factor-setup__status--enabled {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.two-factor-setup__qr {
+  display: block;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  padding: 8px;
+}
+
+.two-factor-setup__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.two-factor-setup__key {
+  display: block;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  word-break: break-all;
+  margin-bottom: 12px;
+}
+
+.two-factor-setup__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.two-factor-setup__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.two-factor-setup__recovery-codes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.two-factor-setup__recovery-codes code {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}

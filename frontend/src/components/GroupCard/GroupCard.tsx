@@ -11,11 +11,11 @@ function membershipBadge(viewerRole: number | null, viewerStatus: number | null)
   return null;
 }
 
-export function GroupCard({ group }: { group: Group }) {
+export function GroupCard({ group, to }: { group: Group; to?: string }) {
   const badge = membershipBadge(group.viewerRole, group.viewerMembershipStatus);
 
   return (
-    <Link to={`/groups/${group.id}`} className="group-card">
+    <Link to={to ?? `/groups/${group.id}`} className="group-card">
       <div className="group-card__top">
         <h2 className="group-card__name">{group.name}</h2>
         {badge && <span className="group-card__badge">{badge}</span>}

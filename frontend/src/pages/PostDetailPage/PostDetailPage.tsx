@@ -5,6 +5,8 @@ import { useAuth } from "../../auth/AuthContext";
 import { CommentForm } from "../../components/CommentForm/CommentForm";
 import { CommentThread } from "../../components/CommentThread/CommentThread";
 import { LikeButton } from "../../components/LikeButton/LikeButton";
+import { ReportButton } from "../../components/ReportButton/ReportButton";
+import { REPORT_TARGET_TYPE } from "../../reports/types";
 import {
   createComment,
   deleteComment,
@@ -176,6 +178,7 @@ export function PostDetailPage() {
                 disabled={likePostMutation.isPending}
                 onToggle={() => likePostMutation.mutate()}
               />
+              <ReportButton targetType={REPORT_TARGET_TYPE.POST} targetId={post.id} />
             </div>
           </>
         )}

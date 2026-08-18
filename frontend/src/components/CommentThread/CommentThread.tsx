@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { CommentForm } from "../CommentForm/CommentForm";
 import { LikeButton } from "../LikeButton/LikeButton";
+import { ReportButton } from "../ReportButton/ReportButton";
 import type { Comment } from "../../posts/types";
 import { resolveAvatarUrl } from "../../lib/avatar";
+import { REPORT_TARGET_TYPE } from "../../reports/types";
 import "./CommentThread.css";
 
 interface CommentThreadProps {
@@ -124,6 +126,7 @@ export function CommentThread({
                   <button type="button" className="comment-thread__reply-button" onClick={() => onReply(isReplying ? null : c.id)}>
                     Reply
                   </button>
+                  <ReportButton targetType={REPORT_TARGET_TYPE.COMMENT} targetId={c.id} />
                   {isAuthor && (
                     <>
                       <button type="button" className="comment-thread__reply-button" onClick={() => startEditing(c)}>

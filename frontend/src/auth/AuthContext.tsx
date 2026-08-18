@@ -1,13 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { apiClient } from "../lib/apiClient";
-import type { AuthResponse, User } from "./types";
+import type { AuthResponse, LoginResponse, User } from "./types";
 
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
-  loginWithGoogle: (idToken: string) => Promise<void>;
-  loginWithPassword: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<LoginResponse>;
+  loginWithPassword: (email: string, password: string) => Promise<LoginResponse>;
+  register: (email: string, password: string, displayName: string) => Promise<LoginResponse>;
+  verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
+  verifyRecoveryCode: (challengeToken: string, recoveryCode: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -39,22 +41,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   }
 
-  async function loginWithGoogle(idToken: string) {
-    const { data } = await apiClient.post<AuthResponse>("/api/auth/google", { idToken });
+  async function handleLoginResponse(promise: Promise<{ data: LoginResponse }>) {
+    const { data } = await promise;
+    if (!data.requiresTwoFactor && data.token && data.user) {
+      applyAuthResponse({ token: data.token, user: data.user });
+    }
+    return data;
+  }
+
+  function loginWithGoogle(idToken: string) {
+    return handleLoginResponse(apiClient.post<LoginResponse>("/api/auth/google", { idToken }));
+  }
+
+  function loginWithPassword(email: string, password: string) {
+    return handleLoginResponse(apiClient.post<LoginResponse>("/api/auth/login", { email, password }));
+  }
+
+  function register(email: string, password: string, displayName: string) {
+    return handleLoginResponse(
+      apiClient.post<LoginResponse>("/api/auth/register", { email, password, displayName })
+    );
+  }
+
+  async function verifyTwoFactor(challengeToken: string, code: string) {
+    const { data } = await apiClient.post<AuthResponse>("/api/auth/2fa/verify", { challengeToken, code });
     applyAuthResponse(data);
   }
 
-  async function loginWithPassword(email: string, password: string) {
-    const { data } = await apiClient.post<AuthResponse>("/api/auth/login", { email, password });
-    applyAuthResponse(data);
-  }
-
-  async function register(email: string, password: string, displayName: string) {
-    const { data } = await apiClient.post<AuthResponse>("/api/auth/register", {
-      email,
-      password,
-      displayName,
-    });
+  async function verifyRecoveryCode(challengeToken: string, recoveryCode: string) {
+    const { data } = await apiClient.post<AuthResponse>("/api/auth/2fa/verify-recovery", { challengeToken, recoveryCode });
     applyAuthResponse(data);
   }
 
@@ -66,7 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, loginWithGoogle, loginWithPassword, register, logout, setUser }}
+      value={{
+        user,
+        isLoading,
+        loginWithGoogle,
+        loginWithPassword,
+        register,
+        verifyTwoFactor,
+        verifyRecoveryCode,
+        logout,
+        setUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

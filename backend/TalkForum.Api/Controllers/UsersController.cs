@@ -82,7 +82,7 @@ public class UsersController : ControllerBase
         return result.Success ? Ok(ToDto(result.Value!)) : NotFound();
     }
 
-    private static UserDto ToDto(ApplicationUser user) => new(user.Id, user.Email!, user.DisplayName, user.AvatarUrl);
+    private static UserDto ToDto(ApplicationUser user) => new(user.Id, user.Email!, user.DisplayName, user.AvatarUrl, user.IsPlatformAdmin, user.TwoFactorEnabled);
 }
 
 public record UpdateProfileRequest(string DisplayName);
