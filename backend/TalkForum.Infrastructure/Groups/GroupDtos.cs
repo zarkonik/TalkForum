@@ -23,3 +23,11 @@ public record MembershipRequestDto(
     string Email,
     string? AvatarUrl,
     DateTimeOffset RequestedAt);
+
+public record GroupMemberDto(
+    Guid UserId,
+    string DisplayName,
+    string Email,
+    string? AvatarUrl,
+    GroupRole Role,
+    DateTimeOffset JoinedAt);

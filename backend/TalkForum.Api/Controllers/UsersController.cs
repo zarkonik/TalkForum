@@ -34,6 +34,13 @@ public class UsersController : ControllerBase
         return result.Success ? Ok(ToDto(result.Value!)) : NotFound();
     }
 
+    [HttpPut("me")]
+    public async Task<ActionResult<UserDto>> UpdateMe(UpdateProfileRequest request)
+    {
+        var result = await _profileService.UpdateDisplayNameAsync(User.GetUserId(), request.DisplayName);
+        return result.Success ? Ok(ToDto(result.Value!)) : BadRequest(new { message = result.Error });
+    }
+
     [HttpPost("me/avatar")]
     public async Task<ActionResult<UserDto>> UploadAvatar([FromForm] IFormFile file)
     {
@@ -77,3 +84,5 @@ public class UsersController : ControllerBase
 
     private static UserDto ToDto(ApplicationUser user) => new(user.Id, user.Email!, user.DisplayName, user.AvatarUrl);
 }
+
+public record UpdateProfileRequest(string DisplayName);

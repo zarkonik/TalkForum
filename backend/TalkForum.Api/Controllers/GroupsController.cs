@@ -53,6 +53,27 @@ public class GroupsController : ControllerBase
         return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
     }
 
+    [HttpGet("{id:guid}/members")]
+    public async Task<ActionResult<IEnumerable<GroupMemberDto>>> GetMembers(Guid id)
+    {
+        var result = await _groupsService.GetMembersAsync(User.GetUserId(), id);
+        return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
+    [HttpPost("{id:guid}/members/{userId:guid}/kick")]
+    public async Task<IActionResult> KickMember(Guid id, Guid userId)
+    {
+        var result = await _groupsService.KickMemberAsync(User.GetUserId(), id, userId);
+        return result.Success ? NoContent() : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
+    [HttpPost("{id:guid}/members/{userId:guid}/ban")]
+    public async Task<IActionResult> BanMember(Guid id, Guid userId)
+    {
+        var result = await _groupsService.BanMemberAsync(User.GetUserId(), id, userId);
+        return result.Success ? NoContent() : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
     [HttpPost("{id:guid}/requests/{userId:guid}/approve")]
     public async Task<IActionResult> ApproveRequest(Guid id, Guid userId)
     {

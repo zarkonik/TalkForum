@@ -29,10 +29,20 @@ export interface MembershipRequest {
   requestedAt: string;
 }
 
+export interface GroupMember {
+  userId: string;
+  displayName: string;
+  email: string;
+  avatarUrl: string | null;
+  role: number;
+  joinedAt: string;
+}
+
 export const MEMBERSHIP_STATUS = {
   PENDING: 0,
   APPROVED: 1,
   REJECTED: 2,
+  BANNED: 3,
 } as const;
 
 export const GROUP_ROLE = {

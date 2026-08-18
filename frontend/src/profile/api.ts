@@ -6,6 +6,11 @@ export async function fetchMe(): Promise<User> {
   return data;
 }
 
+export async function updateDisplayName(displayName: string): Promise<User> {
+  const { data } = await apiClient.put<User>("/api/users/me", { displayName });
+  return data;
+}
+
 export async function uploadAvatar(file: File): Promise<User> {
   const formData = new FormData();
   formData.append("file", file);

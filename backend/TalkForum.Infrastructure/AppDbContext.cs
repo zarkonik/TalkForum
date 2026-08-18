@@ -43,7 +43,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 new Category { Id = new Guid("00000000-0000-0000-0000-000000000005"), Name = "Gaming", Slug = "gaming" },
                 new Category { Id = new Guid("00000000-0000-0000-0000-000000000006"), Name = "Art", Slug = "art" },
                 new Category { Id = new Guid("00000000-0000-0000-0000-000000000007"), Name = "Education", Slug = "education" },
-                new Category { Id = new Guid("00000000-0000-0000-0000-000000000008"), Name = "Other", Slug = "other" }
+                new Category { Id = new Guid("00000000-0000-0000-0000-000000000008"), Name = "Other", Slug = "other" },
+                new Category { Id = new Guid("00000000-0000-0000-0000-000000000009"), Name = "Health", Slug = "health" },
+                new Category { Id = new Guid("00000000-0000-0000-0000-000000000010"), Name = "Wealth", Slug = "wealth" },
+                new Category { Id = new Guid("00000000-0000-0000-0000-000000000011"), Name = "Hobby", Slug = "hobby" },
+                new Category { Id = new Guid("00000000-0000-0000-0000-000000000012"), Name = "Tech", Slug = "tech" }
             );
         });
 

@@ -13,6 +13,12 @@
   gap: 16px;
 }
 
+.group-detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .group-detail__category {
   display: inline-block;
   font-size: 12px;

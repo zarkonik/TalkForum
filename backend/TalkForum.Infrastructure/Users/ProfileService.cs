@@ -21,6 +21,29 @@ public class ProfileService
             : ServiceResult<ApplicationUser>.Ok(user);
     }
 
+    public async Task<ServiceResult<ApplicationUser>> UpdateDisplayNameAsync(Guid userId, string displayName)
+    {
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            return ServiceResult<ApplicationUser>.Fail(ServiceErrorType.Validation, "Display name is required.");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return ServiceResult<ApplicationUser>.Fail(ServiceErrorType.NotFound, "User not found.");
+        }
+
+        user.DisplayName = displayName.Trim();
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            return ServiceResult<ApplicationUser>.Fail(ServiceErrorType.Validation, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        return ServiceResult<ApplicationUser>.Ok(user);
+    }
+
     public async Task<ServiceResult<ApplicationUser>> UpdateAvatarAsync(Guid userId, string avatarUrl)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());

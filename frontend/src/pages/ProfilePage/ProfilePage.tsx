@@ -1,28 +1,54 @@
 import { useMutation } from "@tanstack/react-query";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
 import { resolveAvatarUrl } from "../../lib/avatar";
-import { uploadAvatar } from "../../profile/api";
+import { updateDisplayName, uploadAvatar } from "../../profile/api";
 import "./ProfilePage.css";
 
 export function ProfilePage() {
   const { user, setUser } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
-  const mutation = useMutation({
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+
+  const avatarMutation = useMutation({
     mutationFn: uploadAvatar,
     onSuccess: (updatedUser) => {
-      setError(null);
+      setAvatarError(null);
       setUser(updatedUser);
     },
-    onError: () => setError("Could not upload the avatar. Please try again."),
+    onError: () => setAvatarError("Could not upload the avatar. Please try again."),
+  });
+
+  const nameMutation = useMutation({
+    mutationFn: updateDisplayName,
+    onSuccess: (updatedUser) => {
+      setNameError(null);
+      setUser(updatedUser);
+      setIsEditingName(false);
+    },
+    onError: () => setNameError("Could not update the display name. Please try again."),
   });
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    mutation.mutate(file);
+    avatarMutation.mutate(file);
     e.target.value = "";
+  }
+
+  function startEditingName() {
+    setDisplayName(user?.displayName ?? "");
+    setNameError(null);
+    setIsEditingName(true);
+  }
+
+  function handleNameSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!displayName.trim()) return;
+    nameMutation.mutate(displayName);
   }
 
   const avatarUrl = resolveAvatarUrl(user?.avatarUrl ?? null);
@@ -35,7 +61,33 @@ export function ProfilePage() {
         <div className="profile-page__avatar-placeholder">{user?.displayName?.charAt(0).toUpperCase()}</div>
       )}
 
-      <h1>{user?.displayName}</h1>
+      {isEditingName ? (
+        <form className="profile-page__name-form" onSubmit={handleNameSubmit}>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            autoFocus
+          />
+          <div className="profile-page__name-actions">
+            <button type="submit" className="btn-primary" disabled={nameMutation.isPending}>
+              {nameMutation.isPending ? "Saving..." : "Save"}
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => setIsEditingName(false)}>
+              Cancel
+            </button>
+          </div>
+          {nameError && <p className="form-error">{nameError}</p>}
+        </form>
+      ) : (
+        <div className="profile-page__name">
+          <h1>{user?.displayName}</h1>
+          <button type="button" className="profile-page__edit-name" onClick={startEditingName}>
+            Edit
+          </button>
+        </div>
+      )}
+
       <p className="profile-page__email">{user?.email}</p>
 
       <div className="profile-page__upload">
@@ -44,10 +96,10 @@ export function ProfilePage() {
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={handleFileChange}
-          disabled={mutation.isPending}
+          disabled={avatarMutation.isPending}
         />
-        {mutation.isPending && <p>Uploading...</p>}
-        {error && <p className="form-error">{error}</p>}
+        {avatarMutation.isPending && <p>Uploading...</p>}
+        {avatarError && <p className="form-error">{avatarError}</p>}
       </div>
     </div>
   );
