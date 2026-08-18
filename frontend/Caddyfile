@@ -1,0 +1,17 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode gzip
+	root * /srv
+
+	@api path /api/*
+	reverse_proxy @api api:8080
+
+	@avatars path /avatars/*
+	reverse_proxy @avatars api:8080
+
+	try_files {path} /index.html
+	file_server
+}

@@ -3,6 +3,7 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using TalkForum.Api.Auth;
 using TalkForum.Domain.Entities;
@@ -13,6 +14,7 @@ namespace TalkForum.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -39,7 +41,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<LoginResponse>> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request)
     {
         var existing = await _userManager.FindByEmailAsync(request.Email);
         if (existing is not null)
@@ -60,7 +62,9 @@ public class AuthController : ControllerBase
             return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
         }
 
-        return Ok(ToLoginResponse(user));
+        await SendVerificationEmailAsync(user);
+
+        return Ok(new { message = "Please check your email to verify your account before logging in." });
     }
 
     [HttpPost("login")]
@@ -77,7 +81,47 @@ public class AuthController : ControllerBase
             return StatusCode(403, new { message = "This account has been banned." });
         }
 
+        if (!user.EmailConfirmed)
+        {
+            return StatusCode(403, new { message = "Please verify your email before logging in.", emailNotConfirmed = true });
+        }
+
         return Ok(ToLoginResponse(user));
+    }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail(VerifyEmailRequest request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+        {
+            return BadRequest(new { message = "Invalid or expired verification link." });
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return Ok(new { message = "Email already verified." });
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { message = "Invalid or expired verification link." });
+        }
+
+        return Ok(new { message = "Email verified. You can now log in." });
+    }
+
+    [HttpPost("resend-verification")]
+    public async Task<IActionResult> ResendVerification(ResendVerificationRequest request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is not null && !user.EmailConfirmed)
+        {
+            await SendVerificationEmailAsync(user);
+        }
+
+        return Ok(new { message = "If that email is registered and unverified, a new verification link has been sent." });
     }
 
     [HttpPost("google")]
@@ -306,6 +350,30 @@ public class AuthController : ControllerBase
 
         await _userManager.SetTwoFactorEnabledAsync(user, false);
         return NoContent();
+    }
+
+    private async Task SendVerificationEmailAsync(ApplicationUser user)
+    {
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encodedToken = Uri.EscapeDataString(token);
+        var encodedEmail = Uri.EscapeDataString(user.Email!);
+        var verifyLink = $"{_emailOptions.FrontendBaseUrl}/verify-email?email={encodedEmail}&token={encodedToken}";
+
+        var html = $"""
+            <p>Hi {user.DisplayName},</p>
+            <p>Welcome to TalkForum! Please confirm your email address to activate your account:</p>
+            <p><a href="{verifyLink}">Verify your email</a></p>
+            <p>If you didn't create this account, you can safely ignore this email.</p>
+            """;
+
+        try
+        {
+            await _emailSender.SendAsync(user.Email!, "Verify your TalkForum email", html);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send verification email to user {UserId}.", user.Id);
+        }
     }
 
     private LoginResponse ToLoginResponse(ApplicationUser user)

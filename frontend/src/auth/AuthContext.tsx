@@ -7,7 +7,9 @@ interface AuthContextValue {
   isLoading: boolean;
   loginWithGoogle: (idToken: string) => Promise<LoginResponse>;
   loginWithPassword: (email: string, password: string) => Promise<LoginResponse>;
-  register: (email: string, password: string, displayName: string) => Promise<LoginResponse>;
+  register: (email: string, password: string, displayName: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
+  verifyEmail: (email: string, token: string) => Promise<void>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   verifyRecoveryCode: (challengeToken: string, recoveryCode: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
@@ -59,10 +61,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return handleLoginResponse(apiClient.post<LoginResponse>("/api/auth/login", { email, password }));
   }
 
-  function register(email: string, password: string, displayName: string) {
-    return handleLoginResponse(
-      apiClient.post<LoginResponse>("/api/auth/register", { email, password, displayName })
-    );
+  async function register(email: string, password: string, displayName: string) {
+    await apiClient.post("/api/auth/register", { email, password, displayName });
+  }
+
+  async function resendVerification(email: string) {
+    await apiClient.post("/api/auth/resend-verification", { email });
+  }
+
+  async function verifyEmail(email: string, token: string) {
+    await apiClient.post("/api/auth/verify-email", { email, token });
   }
 
   async function verifyTwoFactor(challengeToken: string, code: string) {
@@ -97,6 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithGoogle,
         loginWithPassword,
         register,
+        resendVerification,
+        verifyEmail,
         verifyTwoFactor,
         verifyRecoveryCode,
         forgotPassword,

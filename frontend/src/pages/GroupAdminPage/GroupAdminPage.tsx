@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { MembershipRequestRow } from "../../components/MembershipRequestRow/MembershipRequestRow";
 import { GroupMemberRow } from "../../components/GroupMemberRow/GroupMemberRow";
+import { PostCard } from "../../components/PostCard/PostCard";
 import {
   approveMembershipRequest,
   banGroupMember,
@@ -12,6 +13,7 @@ import {
   rejectMembershipRequest,
 } from "../../groups/api";
 import { GROUP_ROLE } from "../../groups/types";
+import { fetchPostsByGroup } from "../../posts/api";
 import "./GroupAdminPage.css";
 
 export function GroupAdminPage() {
@@ -36,6 +38,12 @@ export function GroupAdminPage() {
   const membersQuery = useQuery({
     queryKey: ["groups", id, "members"],
     queryFn: () => fetchGroupMembers(id!),
+    enabled: !!id && isOwnerOrModerator,
+  });
+
+  const postsQuery = useQuery({
+    queryKey: ["groups", id, "posts"],
+    queryFn: () => fetchPostsByGroup(id!),
     enabled: !!id && isOwnerOrModerator,
   });
 
@@ -90,6 +98,21 @@ export function GroupAdminPage() {
           <Link className="btn-secondary" to={`/groups/${id}/leaderboard`}>
             Leaderboard
           </Link>
+        </div>
+      </div>
+
+      <div className="group-admin__section">
+        <div className="group-admin__posts-header">
+          <div className="group-admin__section-title">Posts</div>
+          <Link className="btn-secondary" to={`/groups/${id}/posts/new`}>
+            New post
+          </Link>
+        </div>
+        {postsQuery.data?.length === 0 && <p>No posts yet.</p>}
+        <div className="group-admin__posts-list">
+          {postsQuery.data?.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
         </div>
       </div>
 
