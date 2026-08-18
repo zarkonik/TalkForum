@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure.Common;
+using TalkForum.Infrastructure.Notifications;
 
 namespace TalkForum.Infrastructure.Posts;
 
 public class PostsService
 {
     private readonly AppDbContext _db;
+    private readonly NotificationsService _notificationsService;
 
-    public PostsService(AppDbContext db)
+    public PostsService(AppDbContext db, NotificationsService notificationsService)
     {
         _db = db;
+        _notificationsService = notificationsService;
     }
 
     public async Task<ServiceResult<PostSummaryDto>> CreateAsync(Guid userId, Guid groupId, CreatePostRequest request)
@@ -174,6 +177,11 @@ public class PostsService
 
         await _db.SaveChangesAsync();
         var likeCount = await _db.PostLikes.CountAsync(l => l.PostId == postId);
+
+        if (liked)
+        {
+            await _notificationsService.NotifyAsync(post.AuthorId, userId, NotificationType.PostLiked, post.GroupId, postId);
+        }
 
         return ServiceResult<LikeStatusDto>.Ok(new LikeStatusDto(liked, likeCount));
     }

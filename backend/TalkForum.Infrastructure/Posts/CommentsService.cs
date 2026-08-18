@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure.Common;
+using TalkForum.Infrastructure.Notifications;
 
 namespace TalkForum.Infrastructure.Posts;
 
@@ -8,11 +9,13 @@ public class CommentsService
 {
     private readonly AppDbContext _db;
     private readonly PostsService _postsService;
+    private readonly NotificationsService _notificationsService;
 
-    public CommentsService(AppDbContext db, PostsService postsService)
+    public CommentsService(AppDbContext db, PostsService postsService, NotificationsService notificationsService)
     {
         _db = db;
         _postsService = postsService;
+        _notificationsService = notificationsService;
     }
 
     public async Task<ServiceResult<CommentDto>> CreateAsync(Guid userId, Guid postId, CreateCommentRequest request)
@@ -33,10 +36,11 @@ public class CommentsService
             return ServiceResult<CommentDto>.Fail(ServiceErrorType.Validation, "Content is required.");
         }
 
+        Comment? parentComment = null;
         if (request.ParentCommentId is not null)
         {
-            var parentExists = await _db.Comments.AnyAsync(c => c.Id == request.ParentCommentId && c.PostId == postId);
-            if (!parentExists)
+            parentComment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == request.ParentCommentId && c.PostId == postId);
+            if (parentComment is null)
             {
                 return ServiceResult<CommentDto>.Fail(ServiceErrorType.Validation, "Parent comment not found in this post.");
             }
@@ -55,6 +59,12 @@ public class CommentsService
         await _db.SaveChangesAsync();
 
         var author = await _db.Users.FirstAsync(u => u.Id == userId);
+
+        if (parentComment is not null)
+        {
+            await _notificationsService.NotifyAsync(
+                parentComment.AuthorId, userId, NotificationType.CommentReplied, post.GroupId, postId, comment.Id);
+        }
 
         return ServiceResult<CommentDto>.Ok(new CommentDto(
             comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.AuthorId,
@@ -179,6 +189,12 @@ public class CommentsService
 
         await _db.SaveChangesAsync();
         var likeCount = await _db.CommentLikes.CountAsync(l => l.CommentId == commentId);
+
+        if (liked)
+        {
+            await _notificationsService.NotifyAsync(
+                comment.AuthorId, userId, NotificationType.CommentLiked, post.GroupId, post.Id, commentId);
+        }
 
         return ServiceResult<LikeStatusDto>.Ok(new LikeStatusDto(liked, likeCount));
     }

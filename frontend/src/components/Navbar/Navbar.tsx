@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { resolveAvatarUrl } from "../../lib/avatar";
+import { NotificationBell } from "../NotificationBell/NotificationBell";
 import "./Navbar.css";
 
 export function Navbar() {
@@ -23,6 +24,7 @@ export function Navbar() {
       </div>
 
       <div className="navbar__user">
+        <NotificationBell />
         <Link to="/profile" className="navbar__avatar-link">
           {avatarUrl ? (
             <img className="navbar__avatar" src={avatarUrl} alt={user?.displayName} />

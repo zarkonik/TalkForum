@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure.Common;
+using TalkForum.Infrastructure.Notifications;
 
 namespace TalkForum.Infrastructure.Groups;
 
 public class GroupsService
 {
     private readonly AppDbContext _db;
+    private readonly NotificationsService _notificationsService;
 
-    public GroupsService(AppDbContext db)
+    public GroupsService(AppDbContext db, NotificationsService notificationsService)
     {
         _db = db;
+        _notificationsService = notificationsService;
     }
 
     public async Task<ServiceResult<GroupSummaryDto>> CreateAsync(Guid userId, CreateGroupRequest request)
@@ -198,6 +201,12 @@ public class GroupsService
         membership.DecidedByUserId = decidingUserId;
 
         await _db.SaveChangesAsync();
+
+        var notificationType = decision == MembershipStatus.Approved
+            ? NotificationType.GroupMembershipApproved
+            : NotificationType.GroupMembershipRejected;
+        await _notificationsService.NotifyAsync(targetUserId, decidingUserId, notificationType, groupId);
+
         return ServiceResult.Ok();
     }
 
