@@ -54,3 +54,23 @@
   font-weight: 700;
   margin-bottom: 12px;
 }
+
+.group-detail__posts {
+  margin-top: 24px;
+}
+
+.group-detail__posts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.group-detail__posts-header .group-detail__section-title {
+  margin-bottom: 0;
+}
+
+.group-detail__posts-list {
+  display: grid;
+  gap: 12px;
+}

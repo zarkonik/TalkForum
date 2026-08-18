@@ -1,4 +1,5 @@
 import type { MembershipRequest } from "../../groups/types";
+import { resolveAvatarUrl } from "../../lib/avatar";
 import "./MembershipRequestRow.css";
 
 interface MembershipRequestRowProps {
@@ -9,10 +10,12 @@ interface MembershipRequestRowProps {
 }
 
 export function MembershipRequestRow({ request, onApprove, onReject, isBusy }: MembershipRequestRowProps) {
+  const avatarUrl = resolveAvatarUrl(request.avatarUrl);
+
   return (
     <div className="membership-request-row">
-      {request.avatarUrl ? (
-        <img className="membership-request-row__avatar" src={request.avatarUrl} alt={request.displayName} />
+      {avatarUrl ? (
+        <img className="membership-request-row__avatar" src={avatarUrl} alt={request.displayName} />
       ) : (
         <div className="membership-request-row__avatar-placeholder">
           {request.displayName.charAt(0).toUpperCase()}

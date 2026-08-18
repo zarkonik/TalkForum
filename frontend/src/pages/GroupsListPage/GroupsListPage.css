@@ -18,7 +18,10 @@
 }
 
 .groups-list__grid {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
   gap: 16px;
 }
 

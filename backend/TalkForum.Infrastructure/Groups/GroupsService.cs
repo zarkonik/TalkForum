@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TalkForum.Domain.Entities;
+using TalkForum.Infrastructure.Common;
 
 namespace TalkForum.Infrastructure.Groups;
 

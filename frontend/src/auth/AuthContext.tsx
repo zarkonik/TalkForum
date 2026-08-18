@@ -9,6 +9,7 @@ interface AuthContextValue {
   loginWithPassword: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => void;
+  setUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -17,20 +18,24 @@ const TOKEN_KEY = "talkforum_token";
 const USER_KEY = "talkforum_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem(USER_KEY);
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      setUserState(JSON.parse(storedUser));
     }
     setIsLoading(false);
   }, []);
 
+  function setUser(nextUser: User) {
+    localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+    setUserState(nextUser);
+  }
+
   function applyAuthResponse(data: AuthResponse) {
     localStorage.setItem(TOKEN_KEY, data.token);
-    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     setUser(data.user);
   }
 
@@ -56,12 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    setUser(null);
+    setUserState(null);
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, loginWithGoogle, loginWithPassword, register, logout }}
+      value={{ user, isLoading, loginWithGoogle, loginWithPassword, register, logout, setUser }}
     >
       {children}
     </AuthContext.Provider>

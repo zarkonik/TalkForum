@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+import { resolveAvatarUrl } from "../../lib/avatar";
 import "./Navbar.css";
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const avatarUrl = resolveAvatarUrl(user?.avatarUrl ?? null);
 
   return (
     <nav className="navbar">
@@ -21,11 +23,13 @@ export function Navbar() {
       </div>
 
       <div className="navbar__user">
-        {user?.avatarUrl ? (
-          <img className="navbar__avatar" src={user.avatarUrl} alt={user.displayName} />
-        ) : (
-          <div className="navbar__avatar-placeholder">{user?.displayName?.charAt(0).toUpperCase()}</div>
-        )}
+        <Link to="/profile" className="navbar__avatar-link">
+          {avatarUrl ? (
+            <img className="navbar__avatar" src={avatarUrl} alt={user?.displayName} />
+          ) : (
+            <div className="navbar__avatar-placeholder">{user?.displayName?.charAt(0).toUpperCase()}</div>
+          )}
+        </Link>
         <button className="btn-secondary" onClick={logout}>
           Log out
         </button>

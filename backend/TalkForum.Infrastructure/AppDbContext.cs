@@ -112,6 +112,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .WithMany()
                 .HasForeignKey(c => c.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(c => c.ParentComment)
+                .WithMany(c => c.Replies)
+                .HasForeignKey(c => c.ParentCommentId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
