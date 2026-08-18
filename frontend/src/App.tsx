@@ -10,9 +10,11 @@ import { GroupsListPage } from "./pages/GroupsListPage/GroupsListPage";
 import { DiscoveryPage } from "./pages/DiscoveryPage/DiscoveryPage";
 import { CreateGroupPage } from "./pages/CreateGroupPage/CreateGroupPage";
 import { GroupDetailPage } from "./pages/GroupDetailPage/GroupDetailPage";
+import { GroupAdminPage } from "./pages/GroupAdminPage/GroupAdminPage";
 import { CreatePostPage } from "./pages/CreatePostPage/CreatePostPage";
 import { PostDetailPage } from "./pages/PostDetailPage/PostDetailPage";
 import { ProfilePage } from "./pages/ProfilePage/ProfilePage";
+import { LeaderboardPage } from "./pages/LeaderboardPage/LeaderboardPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ function App() {
                 <Route path="/discovery" element={<DiscoveryPage />} />
                 <Route path="/groups/new" element={<CreateGroupPage />} />
                 <Route path="/groups/:id" element={<GroupDetailPage />} />
+                <Route path="/groups/:id/admin" element={<GroupAdminPage />} />
+                <Route path="/groups/:id/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/groups/:groupId/posts/new" element={<CreatePostPage />} />
                 <Route path="/posts/:id" element={<PostDetailPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

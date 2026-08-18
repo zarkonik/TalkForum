@@ -177,6 +177,65 @@ public class GroupsService
         return ServiceResult<IEnumerable<MembershipRequestDto>>.Ok(requests);
     }
 
+    public async Task<ServiceResult<IEnumerable<GroupMemberDto>>> GetMembersAsync(Guid requestingUserId, Guid groupId)
+    {
+        if (!await IsModeratorOrOwnerAsync(groupId, requestingUserId))
+        {
+            return ServiceResult<IEnumerable<GroupMemberDto>>.Fail(ServiceErrorType.Forbidden, "Not authorized.");
+        }
+
+        var members = await _db.GroupMemberships
+            .Include(m => m.User)
+            .Where(m => m.GroupId == groupId && m.Status == MembershipStatus.Approved)
+            .OrderByDescending(m => m.Role)
+            .ThenBy(m => m.User!.DisplayName)
+            .Select(m => new GroupMemberDto(m.UserId, m.User!.DisplayName, m.User.Email!, m.User.AvatarUrl, m.Role, m.DecidedAt ?? m.RequestedAt))
+            .ToListAsync();
+
+        return ServiceResult<IEnumerable<GroupMemberDto>>.Ok(members);
+    }
+
+    public Task<ServiceResult> KickMemberAsync(Guid actingUserId, Guid groupId, Guid targetUserId) =>
+        RemoveMemberAsync(actingUserId, groupId, targetUserId, ban: false);
+
+    public Task<ServiceResult> BanMemberAsync(Guid actingUserId, Guid groupId, Guid targetUserId) =>
+        RemoveMemberAsync(actingUserId, groupId, targetUserId, ban: true);
+
+    private async Task<ServiceResult> RemoveMemberAsync(Guid actingUserId, Guid groupId, Guid targetUserId, bool ban)
+    {
+        if (!await IsModeratorOrOwnerAsync(groupId, actingUserId))
+        {
+            return ServiceResult.Fail(ServiceErrorType.Forbidden, "Not authorized.");
+        }
+
+        var membership = await _db.GroupMemberships.FirstOrDefaultAsync(m =>
+            m.GroupId == groupId && m.UserId == targetUserId && m.Status == MembershipStatus.Approved);
+
+        if (membership is null)
+        {
+            return ServiceResult.Fail(ServiceErrorType.NotFound, "Member not found.");
+        }
+
+        if (membership.Role == GroupRole.Owner)
+        {
+            return ServiceResult.Fail(ServiceErrorType.Validation, "The group owner cannot be removed.");
+        }
+
+        if (ban)
+        {
+            membership.Status = MembershipStatus.Banned;
+            membership.DecidedAt = DateTimeOffset.UtcNow;
+            membership.DecidedByUserId = actingUserId;
+        }
+        else
+        {
+            _db.GroupMemberships.Remove(membership);
+        }
+
+        await _db.SaveChangesAsync();
+        return ServiceResult.Ok();
+    }
+
     public Task<ServiceResult> ApproveRequestAsync(Guid decidingUserId, Guid groupId, Guid targetUserId) =>
         DecideRequestAsync(decidingUserId, groupId, targetUserId, MembershipStatus.Approved);
 

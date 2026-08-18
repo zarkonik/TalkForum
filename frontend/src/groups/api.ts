@@ -1,5 +1,5 @@
 import { apiClient } from "../lib/apiClient";
-import type { Category, Group, MembershipRequest } from "./types";
+import type { Category, Group, GroupMember, MembershipRequest } from "./types";
 
 export async function fetchCategories(): Promise<Category[]> {
   const { data } = await apiClient.get<Category[]>("/api/categories");
@@ -43,4 +43,17 @@ export async function approveMembershipRequest(groupId: string, userId: string):
 
 export async function rejectMembershipRequest(groupId: string, userId: string): Promise<void> {
   await apiClient.post(`/api/groups/${groupId}/requests/${userId}/reject`);
+}
+
+export async function fetchGroupMembers(groupId: string): Promise<GroupMember[]> {
+  const { data } = await apiClient.get<GroupMember[]>(`/api/groups/${groupId}/members`);
+  return data;
+}
+
+export async function kickGroupMember(groupId: string, userId: string): Promise<void> {
+  await apiClient.post(`/api/groups/${groupId}/members/${userId}/kick`);
+}
+
+export async function banGroupMember(groupId: string, userId: string): Promise<void> {
+  await apiClient.post(`/api/groups/${groupId}/members/${userId}/ban`);
 }

@@ -8,6 +8,7 @@ using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure;
 using TalkForum.Infrastructure.Auth;
 using TalkForum.Infrastructure.Groups;
+using TalkForum.Infrastructure.Leaderboard;
 using TalkForum.Infrastructure.Notifications;
 using TalkForum.Infrastructure.Posts;
 using TalkForum.Infrastructure.Users;
@@ -47,6 +48,7 @@ builder.Services.AddScoped<GroupsService>();
 builder.Services.AddScoped<PostsService>();
 builder.Services.AddScoped<CommentsService>();
 builder.Services.AddScoped<ProfileService>();
+builder.Services.AddScoped<LeaderboardService>();
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration section missing.");

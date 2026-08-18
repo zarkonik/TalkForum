@@ -32,6 +32,43 @@
   font-weight: 700;
 }
 
+.profile-page__name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.profile-page__name h1 {
+  margin: 0;
+}
+
+.profile-page__edit-name {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.profile-page__edit-name:hover {
+  color: var(--color-primary);
+}
+
+.profile-page__name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.profile-page__name-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
 .profile-page__email {
   color: var(--color-text-muted);
   font-size: 14px;

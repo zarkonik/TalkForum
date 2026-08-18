@@ -1,0 +1,30 @@
+.group-admin__header {
+  margin-bottom: 24px;
+}
+
+.group-admin__header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.group-admin__subtitle {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.group-admin__section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+
+.group-admin__section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
