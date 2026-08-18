@@ -9,6 +9,8 @@ export interface Post {
   createdAt: string;
   updatedAt: string | null;
   commentCount: number;
+  likeCount: number;
+  viewerHasLiked: boolean;
 }
 
 export interface Comment {
@@ -20,4 +22,12 @@ export interface Comment {
   authorDisplayName: string;
   authorAvatarUrl: string | null;
   createdAt: string;
+  updatedAt: string | null;
+  likeCount: number;
+  viewerHasLiked: boolean;
+}
+
+export interface LikeStatus {
+  liked: boolean;
+  likeCount: number;
 }

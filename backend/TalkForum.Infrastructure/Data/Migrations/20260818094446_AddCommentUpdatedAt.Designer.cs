@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TalkForum.Infrastructure;
@@ -11,9 +12,11 @@ using TalkForum.Infrastructure;
 namespace TalkForum.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260818094446_AddCommentUpdatedAt")]
+    partial class AddCommentUpdatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -338,31 +341,6 @@ namespace TalkForum.Infrastructure.Data.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("TalkForum.Domain.Entities.CommentLike", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CommentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("CommentId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("CommentLikes");
-                });
-
             modelBuilder.Entity("TalkForum.Domain.Entities.Group", b =>
                 {
                     b.Property<Guid>("Id")
@@ -484,31 +462,6 @@ namespace TalkForum.Infrastructure.Data.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("TalkForum.Domain.Entities.PostLike", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("PostId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("PostLikes");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -586,25 +539,6 @@ namespace TalkForum.Infrastructure.Data.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("TalkForum.Domain.Entities.CommentLike", b =>
-                {
-                    b.HasOne("TalkForum.Domain.Entities.Comment", "Comment")
-                        .WithMany("Likes")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TalkForum.Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TalkForum.Domain.Entities.Group", b =>
                 {
                     b.HasOne("TalkForum.Domain.Entities.Category", "Category")
@@ -676,25 +610,6 @@ namespace TalkForum.Infrastructure.Data.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("TalkForum.Domain.Entities.PostLike", b =>
-                {
-                    b.HasOne("TalkForum.Domain.Entities.Post", "Post")
-                        .WithMany("Likes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TalkForum.Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TalkForum.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Groups");
@@ -702,8 +617,6 @@ namespace TalkForum.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("TalkForum.Domain.Entities.Comment", b =>
                 {
-                    b.Navigation("Likes");
-
                     b.Navigation("Replies");
                 });
 
@@ -719,8 +632,6 @@ namespace TalkForum.Infrastructure.Data.Migrations
             modelBuilder.Entity("TalkForum.Domain.Entities.Post", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

@@ -13,4 +13,5 @@ public class Post
     public Group? Group { get; set; }
     public ApplicationUser? Author { get; set; }
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public ICollection<PostLike> Likes { get; set; } = new List<PostLike>();
 }

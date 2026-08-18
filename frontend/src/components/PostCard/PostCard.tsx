@@ -1,10 +1,21 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import type { Post } from "../../posts/types";
+import { togglePostLike } from "../../posts/api";
 import { resolveAvatarUrl } from "../../lib/avatar";
+import { LikeButton } from "../LikeButton/LikeButton";
 import "./PostCard.css";
 
 export function PostCard({ post }: { post: Post }) {
   const avatarUrl = resolveAvatarUrl(post.authorAvatarUrl);
+  const queryClient = useQueryClient();
+
+  const likeMutation = useMutation({
+    mutationFn: () => togglePostLike(post.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups", post.groupId, "posts"] });
+    },
+  });
 
   return (
     <Link to={`/posts/${post.id}`} className="post-card">
@@ -19,6 +30,17 @@ export function PostCard({ post }: { post: Post }) {
         <span>{post.authorDisplayName}</span>
         <span>·</span>
         <span>{post.commentCount} {post.commentCount === 1 ? "comment" : "comments"}</span>
+        <span>·</span>
+        <LikeButton
+          liked={post.viewerHasLiked}
+          count={post.likeCount}
+          disabled={likeMutation.isPending}
+          onToggle={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            likeMutation.mutate();
+          }}
+        />
       </div>
     </Link>
   );

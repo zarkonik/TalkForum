@@ -46,7 +46,7 @@ public class PostsService
 
         return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
             post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, author.DisplayName, author.AvatarUrl,
-            post.CreatedAt, post.UpdatedAt, 0));
+            post.CreatedAt, post.UpdatedAt, 0, 0, false));
     }
 
     public async Task<ServiceResult<IEnumerable<PostSummaryDto>>> GetByGroupAsync(Guid userId, Guid groupId)
@@ -67,7 +67,7 @@ public class PostsService
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PostSummaryDto(
                 p.Id, p.GroupId, p.Title, p.Content, p.AuthorId, p.Author!.DisplayName, p.Author.AvatarUrl,
-                p.CreatedAt, p.UpdatedAt, p.Comments.Count))
+                p.CreatedAt, p.UpdatedAt, p.Comments.Count, p.Likes.Count, p.Likes.Any(l => l.UserId == userId)))
             .ToListAsync();
 
         return ServiceResult<IEnumerable<PostSummaryDto>>.Ok(posts);
@@ -87,10 +87,95 @@ public class PostsService
         }
 
         var commentCount = await _db.Comments.CountAsync(c => c.PostId == postId);
+        var likeCount = await _db.PostLikes.CountAsync(l => l.PostId == postId);
+        var viewerHasLiked = await _db.PostLikes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
 
         return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
             post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, post.Author!.DisplayName, post.Author.AvatarUrl,
-            post.CreatedAt, post.UpdatedAt, commentCount));
+            post.CreatedAt, post.UpdatedAt, commentCount, likeCount, viewerHasLiked));
+    }
+
+    public async Task<ServiceResult<PostSummaryDto>> UpdateAsync(Guid userId, Guid postId, UpdatePostRequest request)
+    {
+        var post = await _db.Posts.Include(p => p.Author).FirstOrDefaultAsync(p => p.Id == postId);
+        if (post is null)
+        {
+            return ServiceResult<PostSummaryDto>.Fail(ServiceErrorType.NotFound, "Post not found.");
+        }
+
+        if (post.AuthorId != userId)
+        {
+            return ServiceResult<PostSummaryDto>.Fail(ServiceErrorType.Forbidden, "You can only edit your own posts.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            return ServiceResult<PostSummaryDto>.Fail(ServiceErrorType.Validation, "Title is required.");
+        }
+
+        post.Title = request.Title.Trim();
+        post.Content = request.Content.Trim();
+        post.UpdatedAt = DateTimeOffset.UtcNow;
+        await _db.SaveChangesAsync();
+
+        var commentCount = await _db.Comments.CountAsync(c => c.PostId == postId);
+        var likeCount = await _db.PostLikes.CountAsync(l => l.PostId == postId);
+        var viewerHasLiked = await _db.PostLikes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
+
+        return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
+            post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, post.Author!.DisplayName, post.Author.AvatarUrl,
+            post.CreatedAt, post.UpdatedAt, commentCount, likeCount, viewerHasLiked));
+    }
+
+    public async Task<ServiceResult> DeleteAsync(Guid userId, Guid postId)
+    {
+        var post = await _db.Posts.FindAsync(postId);
+        if (post is null)
+        {
+            return ServiceResult.Fail(ServiceErrorType.NotFound, "Post not found.");
+        }
+
+        if (post.AuthorId != userId)
+        {
+            return ServiceResult.Fail(ServiceErrorType.Forbidden, "You can only delete your own posts.");
+        }
+
+        _db.Posts.Remove(post);
+        await _db.SaveChangesAsync();
+        return ServiceResult.Ok();
+    }
+
+    public async Task<ServiceResult<LikeStatusDto>> ToggleLikeAsync(Guid userId, Guid postId)
+    {
+        var post = await _db.Posts.FindAsync(postId);
+        if (post is null)
+        {
+            return ServiceResult<LikeStatusDto>.Fail(ServiceErrorType.NotFound, "Post not found.");
+        }
+
+        if (!await IsApprovedMemberAsync(post.GroupId, userId))
+        {
+            return ServiceResult<LikeStatusDto>.Fail(ServiceErrorType.Forbidden, "You must be an approved member of this group to like posts.");
+        }
+
+        var existingLike = await _db.PostLikes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
+        bool liked;
+
+        if (existingLike is not null)
+        {
+            _db.PostLikes.Remove(existingLike);
+            liked = false;
+        }
+        else
+        {
+            _db.PostLikes.Add(new PostLike { Id = Guid.NewGuid(), PostId = postId, UserId = userId });
+            liked = true;
+        }
+
+        await _db.SaveChangesAsync();
+        var likeCount = await _db.PostLikes.CountAsync(l => l.PostId == postId);
+
+        return ServiceResult<LikeStatusDto>.Ok(new LikeStatusDto(liked, likeCount));
     }
 
     internal async Task<bool> IsApprovedMemberAsync(Guid groupId, Guid userId)

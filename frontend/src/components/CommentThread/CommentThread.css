@@ -58,6 +58,17 @@
   white-space: pre-wrap;
 }
 
+.comment-thread__edited {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.comment-thread__actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+}
+
 .comment-thread__reply-button {
   border: none;
   background: transparent;
@@ -65,15 +76,48 @@
   font-size: 12px;
   font-weight: 600;
   padding: 0;
-  margin-top: 6px;
 }
 
 .comment-thread__reply-button:hover {
   color: var(--color-primary);
 }
 
+.comment-thread__reply-button--danger:hover {
+  color: var(--color-error);
+}
+
 .comment-thread__reply-form {
   margin-top: 10px;
+}
+
+.comment-thread__edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.comment-thread__edit-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.comment-thread__edit-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.comment-thread__edit-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .comment-thread__replies {

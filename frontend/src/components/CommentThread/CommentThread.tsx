@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { CommentForm } from "../CommentForm/CommentForm";
+import { LikeButton } from "../LikeButton/LikeButton";
 import type { Comment } from "../../posts/types";
 import { resolveAvatarUrl } from "../../lib/avatar";
 import "./CommentThread.css";
@@ -6,9 +8,13 @@ import "./CommentThread.css";
 interface CommentThreadProps {
   comment: Comment;
   allComments: Comment[];
+  currentUserId: string | null;
   replyingToId: string | null;
   onReply: (id: string | null) => void;
   onSubmitReply: (content: string, parentCommentId: string) => Promise<unknown>;
+  onUpdate: (commentId: string, content: string) => Promise<unknown>;
+  onDelete: (commentId: string) => void;
+  onToggleLike: (commentId: string) => void;
 }
 
 function collectReplies(rootId: string, allComments: Comment[]): Comment[] {
@@ -28,13 +34,46 @@ function collectReplies(rootId: string, allComments: Comment[]): Comment[] {
   return result.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
-export function CommentThread({ comment, allComments, replyingToId, onReply, onSubmitReply }: CommentThreadProps) {
+export function CommentThread({
+  comment,
+  allComments,
+  currentUserId,
+  replyingToId,
+  onReply,
+  onSubmitReply,
+  onUpdate,
+  onDelete,
+  onToggleLike,
+}: CommentThreadProps) {
   const commentsById = new Map(allComments.map((c) => [c.id, c]));
   const replies = collectReplies(comment.id, allComments);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  function startEditing(c: Comment) {
+    setEditingId(c.id);
+    setEditContent(c.content);
+    onReply(null);
+  }
+
+  async function saveEdit(commentId: string) {
+    if (!editContent.trim()) return;
+    setIsSavingEdit(true);
+    try {
+      await onUpdate(commentId, editContent);
+      setEditingId(null);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  }
 
   function renderComment(c: Comment, replyToAuthor: string | null) {
     const avatarUrl = resolveAvatarUrl(c.authorAvatarUrl);
     const isReplying = replyingToId === c.id;
+    const isEditing = editingId === c.id;
+    const isAuthor = currentUserId !== null && currentUserId === c.authorId;
 
     return (
       <div className="comment-thread__item" key={c.id}>
@@ -47,14 +86,61 @@ export function CommentThread({ comment, allComments, replyingToId, onReply, onS
           <div className="comment-thread__body">
             {replyToAuthor && <div className="comment-thread__reply-to">Reply to {replyToAuthor}</div>}
             <div className="comment-thread__author">{c.authorDisplayName}</div>
-            <div className="comment-thread__content">{c.content}</div>
-            <button
-              type="button"
-              className="comment-thread__reply-button"
-              onClick={() => onReply(isReplying ? null : c.id)}
-            >
-              Reply
-            </button>
+
+            {isEditing ? (
+              <div className="comment-thread__edit-form">
+                <textarea
+                  className="comment-thread__edit-textarea"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  autoFocus
+                />
+                <div className="comment-thread__edit-actions">
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    disabled={isSavingEdit}
+                    onClick={() => saveEdit(c.id)}
+                  >
+                    {isSavingEdit ? "Saving..." : "Save"}
+                  </button>
+                  <button type="button" className="btn-secondary" onClick={() => setEditingId(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="comment-thread__content">
+                  {c.content}
+                  {c.updatedAt && <span className="comment-thread__edited"> (edited)</span>}
+                </div>
+                <div className="comment-thread__actions">
+                  <LikeButton
+                    liked={c.viewerHasLiked}
+                    count={c.likeCount}
+                    onToggle={() => onToggleLike(c.id)}
+                  />
+                  <button type="button" className="comment-thread__reply-button" onClick={() => onReply(isReplying ? null : c.id)}>
+                    Reply
+                  </button>
+                  {isAuthor && (
+                    <>
+                      <button type="button" className="comment-thread__reply-button" onClick={() => startEditing(c)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="comment-thread__reply-button comment-thread__reply-button--danger"
+                        onClick={() => onDelete(c.id)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
 
             {isReplying && (
               <div className="comment-thread__reply-form">
