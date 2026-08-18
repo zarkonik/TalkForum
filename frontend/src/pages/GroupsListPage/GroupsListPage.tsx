@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GroupCard } from "../../components/GroupCard/GroupCard";
 import { fetchCategories, fetchGroups } from "../../groups/api";
 import "./GroupsListPage.css";
@@ -13,13 +13,21 @@ export function GroupsListPage() {
     queryFn: fetchCategories,
   });
 
+  useEffect(() => {
+    if (!categoryId && categories && categories.length > 0) {
+      const defaultCategory = categories.find((c) => c.name === "Software") ?? categories[0];
+      setCategoryId(defaultCategory.id);
+    }
+  }, [categories, categoryId]);
+
   const { data: groups, isLoading } = useQuery({
     queryKey: ["groups", { search, categoryId }],
-    queryFn: () => fetchGroups({ search: search || undefined, categoryId: categoryId || undefined }),
+    queryFn: () => fetchGroups({ search: search || undefined, categoryId }),
+    enabled: !!categoryId,
   });
 
   return (
-    <div>
+    <div className="groups-list">
       <h1>Groups</h1>
 
       <div className="groups-list__toolbar">
@@ -35,7 +43,6 @@ export function GroupsListPage() {
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
         >
-          <option value="">All categories</option>
           {categories?.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}

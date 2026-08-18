@@ -47,6 +47,16 @@ public class PostsService
 
         var author = await _db.Users.FirstAsync(u => u.Id == userId);
 
+        var ownerUserId = await _db.GroupMemberships
+            .Where(m => m.GroupId == groupId && m.Role == GroupRole.Owner && m.Status == MembershipStatus.Approved)
+            .Select(m => (Guid?)m.UserId)
+            .FirstOrDefaultAsync();
+
+        if (ownerUserId is not null)
+        {
+            await _notificationsService.NotifyAsync(ownerUserId.Value, userId, NotificationType.PostCreatedInGroup, groupId, post.Id);
+        }
+
         return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
             post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, author.DisplayName, author.AvatarUrl,
             post.CreatedAt, post.UpdatedAt, 0, 0, false));
