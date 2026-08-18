@@ -145,6 +145,9 @@ export function LoginPage() {
         </form>
 
         <p className="login-page__footer">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+        <p className="login-page__footer">
           Don't have an account? <Link to="/register">Sign up</Link>
         </p>
       </div>

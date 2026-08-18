@@ -1,3 +1,4 @@
+import axios from "axios";
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
@@ -9,16 +10,22 @@ export function RegisterPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
+    setErrors([]);
     try {
       await register(email, password, displayName);
       navigate("/");
-    } catch {
-      setError("Registration failed. Email may already be in use.");
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        setErrors(["Email already in use."]);
+      } else if (axios.isAxiosError(err) && Array.isArray(err.response?.data?.errors)) {
+        setErrors(err.response.data.errors);
+      } else {
+        setErrors(["Registration failed. Please try again."]);
+      }
     }
   }
 
@@ -51,7 +58,15 @@ export function RegisterPage() {
             minLength={8}
             required
           />
-          {error && <p className="form-error">{error}</p>}
+          {errors.length > 0 && (
+            <div className="form-error">
+              <ul className="form-error__list">
+                {errors.map((e) => (
+                  <li key={e}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <button type="submit" className="btn-primary">
             Sign up
           </button>

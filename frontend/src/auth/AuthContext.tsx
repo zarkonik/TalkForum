@@ -10,6 +10,8 @@ interface AuthContextValue {
   register: (email: string, password: string, displayName: string) => Promise<LoginResponse>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   verifyRecoveryCode: (challengeToken: string, recoveryCode: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, token: string, newPassword: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -73,6 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     applyAuthResponse(data);
   }
 
+  async function forgotPassword(email: string) {
+    await apiClient.post("/api/auth/forgot-password", { email });
+  }
+
+  async function resetPassword(email: string, token: string, newPassword: string) {
+    await apiClient.post("/api/auth/reset-password", { email, token, newPassword });
+  }
+
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
@@ -89,6 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         verifyTwoFactor,
         verifyRecoveryCode,
+        forgotPassword,
+        resetPassword,
         logout,
         setUser,
       }}
