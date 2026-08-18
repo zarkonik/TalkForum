@@ -8,6 +8,7 @@ using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure;
 using TalkForum.Infrastructure.Auth;
 using TalkForum.Infrastructure.Groups;
+using TalkForum.Infrastructure.Notifications;
 using TalkForum.Infrastructure.Posts;
 using TalkForum.Infrastructure.Users;
 
@@ -41,6 +42,7 @@ builder.Services
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection(GoogleAuthOptions.SectionName));
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<NotificationsService>();
 builder.Services.AddScoped<GroupsService>();
 builder.Services.AddScoped<PostsService>();
 builder.Services.AddScoped<CommentsService>();

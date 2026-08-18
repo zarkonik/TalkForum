@@ -18,6 +18,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<PostLike> PostLikes => Set<PostLike>();
     public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -148,6 +149,36 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
             entity.HasOne(l => l.User)
                 .WithMany()
                 .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Notification>(entity =>
+        {
+            entity.HasIndex(n => new { n.RecipientUserId, n.IsRead });
+
+            entity.HasOne(n => n.Recipient)
+                .WithMany()
+                .HasForeignKey(n => n.RecipientUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(n => n.Actor)
+                .WithMany()
+                .HasForeignKey(n => n.ActorUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(n => n.Group)
+                .WithMany()
+                .HasForeignKey(n => n.GroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(n => n.Post)
+                .WithMany()
+                .HasForeignKey(n => n.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(n => n.Comment)
+                .WithMany()
+                .HasForeignKey(n => n.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
