@@ -5,6 +5,7 @@ export function getNotificationLink(n: Notification): string | null {
     case NOTIFICATION_TYPE.POST_LIKED:
     case NOTIFICATION_TYPE.COMMENT_LIKED:
     case NOTIFICATION_TYPE.COMMENT_REPLIED:
+    case NOTIFICATION_TYPE.POST_CREATED_IN_GROUP:
       return n.postId ? `/posts/${n.postId}` : null;
     case NOTIFICATION_TYPE.GROUP_MEMBERSHIP_APPROVED:
     case NOTIFICATION_TYPE.GROUP_MEMBERSHIP_REJECTED:

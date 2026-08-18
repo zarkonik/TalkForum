@@ -125,3 +125,9 @@ button {
   font-size: 14px;
   font-weight: 500;
 }
+
+.page-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}

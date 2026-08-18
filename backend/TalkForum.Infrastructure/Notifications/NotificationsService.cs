@@ -59,6 +59,7 @@ public class NotificationsService
             NotificationType.CommentReplied => $"{actor} replied to your comment.",
             NotificationType.GroupMembershipApproved => $"{actor} approved your request to join {n.Group?.Name}.",
             NotificationType.GroupMembershipRejected => $"{actor} rejected your request to join {n.Group?.Name}.",
+            NotificationType.PostCreatedInGroup => $"{actor} created a new post in {n.Group?.Name}.",
             _ => $"{actor} did something."
         };
     }

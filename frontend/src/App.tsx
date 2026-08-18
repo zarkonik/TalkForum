@@ -7,6 +7,7 @@ import { Layout } from "./components/Layout/Layout";
 import { LoginPage } from "./pages/LoginPage/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage/RegisterPage";
 import { GroupsListPage } from "./pages/GroupsListPage/GroupsListPage";
+import { DiscoveryPage } from "./pages/DiscoveryPage/DiscoveryPage";
 import { CreateGroupPage } from "./pages/CreateGroupPage/CreateGroupPage";
 import { GroupDetailPage } from "./pages/GroupDetailPage/GroupDetailPage";
 import { CreatePostPage } from "./pages/CreatePostPage/CreatePostPage";
@@ -32,6 +33,7 @@ function App() {
                 }
               >
                 <Route path="/" element={<GroupsListPage />} />
+                <Route path="/discovery" element={<DiscoveryPage />} />
                 <Route path="/groups/new" element={<CreateGroupPage />} />
                 <Route path="/groups/:id" element={<GroupDetailPage />} />
                 <Route path="/groups/:groupId/posts/new" element={<CreatePostPage />} />

@@ -18,6 +18,9 @@ export function Navbar() {
         <Link to="/" className="navbar__link">
           Groups
         </Link>
+        <Link to="/discovery" className="navbar__link">
+          Discover
+        </Link>
         <Link to="/groups/new" className="navbar__link">
           Create group
         </Link>

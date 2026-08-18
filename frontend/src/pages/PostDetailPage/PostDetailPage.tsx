@@ -106,7 +106,7 @@ export function PostDetailPage() {
   }
 
   return (
-    <div>
+    <div className="page-container">
       <div className="post-detail__header">
         {isEditingPost ? (
           <div className="post-detail__edit-form">

@@ -62,7 +62,7 @@ export function GroupDetailPage() {
   }
 
   return (
-    <div>
+    <div className="page-container">
       <div className="group-detail__header">
         <div className="group-detail__top">
           <div>
