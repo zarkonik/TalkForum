@@ -18,3 +18,8 @@ export interface LoginResponse {
   token: string | null;
   user: User | null;
 }
+
+export interface EmailNotConfirmedError {
+  message: string;
+  emailNotConfirmed: true;
+}

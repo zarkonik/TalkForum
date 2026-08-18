@@ -28,3 +28,19 @@
   font-weight: 700;
   margin-bottom: 12px;
 }
+
+.group-admin__posts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.group-admin__posts-header .group-admin__section-title {
+  margin-bottom: 0;
+}
+
+.group-admin__posts-list {
+  display: grid;
+  gap: 12px;
+}

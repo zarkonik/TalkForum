@@ -29,3 +29,7 @@ public record VerifyRecoveryCodeRequest(string ChallengeToken, string RecoveryCo
 public record ForgotPasswordRequest(string Email);
 
 public record ResetPasswordRequest(string Email, string Token, string NewPassword);
+
+public record VerifyEmailRequest(string Email, string Token);
+
+public record ResendVerificationRequest(string Email);

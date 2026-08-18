@@ -1,23 +1,23 @@
 import axios from "axios";
 import { type FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import "./RegisterPage.css";
 
 export function RegisterPage() {
   const { register } = useAuth();
-  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrors([]);
     try {
       await register(email, password, displayName);
-      navigate("/");
+      setIsRegistered(true);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         setErrors(["Email already in use."]);
@@ -27,6 +27,22 @@ export function RegisterPage() {
         setErrors(["Registration failed. Please try again."]);
       }
     }
+  }
+
+  if (isRegistered) {
+    return (
+      <div className="register-page">
+        <div className="register-page__card">
+          <h1>Check your email</h1>
+          <p className="register-page__subtitle">
+            We've sent a verification link to {email}. Click it to activate your account before logging in.
+          </p>
+          <p className="register-page__footer">
+            <Link to="/login">Back to login</Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

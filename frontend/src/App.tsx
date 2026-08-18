@@ -8,6 +8,7 @@ import { LoginPage } from "./pages/LoginPage/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage/RegisterPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage/ResetPasswordPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage/VerifyEmailPage";
 import { GroupsListPage } from "./pages/GroupsListPage/GroupsListPage";
 import { MyGroupsPage } from "./pages/MyGroupsPage/MyGroupsPage";
 import { DiscoveryPage } from "./pages/DiscoveryPage/DiscoveryPage";
@@ -33,6 +34,7 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route
                 element={
                   <ProtectedRoute>

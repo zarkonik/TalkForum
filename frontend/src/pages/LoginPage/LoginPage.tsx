@@ -1,15 +1,18 @@
 import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import "./LoginPage.css";
 
 export function LoginPage() {
-  const { loginWithGoogle, loginWithPassword, verifyTwoFactor, verifyRecoveryCode } = useAuth();
+  const { loginWithGoogle, loginWithPassword, verifyTwoFactor, verifyRecoveryCode, resendVerification } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -19,6 +22,8 @@ export function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setEmailNotConfirmed(false);
+    setResendState("idle");
     try {
       const result = await loginWithPassword(email, password);
       if (result.requiresTwoFactor && result.challengeToken) {
@@ -26,8 +31,22 @@ export function LoginPage() {
       } else {
         navigate("/");
       }
-    } catch {
-      setError("Invalid email or password.");
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 403 && err.response.data?.emailNotConfirmed) {
+        setEmailNotConfirmed(true);
+        setError(err.response.data.message ?? "Please verify your email before logging in.");
+      } else {
+        setError("Invalid email or password.");
+      }
+    }
+  }
+
+  async function handleResendVerification() {
+    setResendState("sending");
+    try {
+      await resendVerification(email);
+    } finally {
+      setResendState("sent");
     }
   }
 
@@ -139,6 +158,20 @@ export function LoginPage() {
             required
           />
           {error && <p className="form-error">{error}</p>}
+          {emailNotConfirmed && (
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={resendState !== "idle"}
+              onClick={handleResendVerification}
+            >
+              {resendState === "sending"
+                ? "Sending..."
+                : resendState === "sent"
+                  ? "Verification email sent"
+                  : "Resend verification email"}
+            </button>
+          )}
           <button type="submit" className="btn-primary">
             Log in
           </button>
