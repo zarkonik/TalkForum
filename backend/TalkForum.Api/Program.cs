@@ -8,6 +8,10 @@ using TalkForum.Domain.Entities;
 using TalkForum.Infrastructure;
 using TalkForum.Infrastructure.Auth;
 using TalkForum.Infrastructure.Groups;
+using TalkForum.Infrastructure.Posts;
+using TalkForum.Infrastructure.Users;
+
+Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars"));
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +42,9 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptio
 builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection(GoogleAuthOptions.SectionName));
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<GroupsService>();
+builder.Services.AddScoped<PostsService>();
+builder.Services.AddScoped<CommentsService>();
+builder.Services.AddScoped<ProfileService>();
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration section missing.");
@@ -90,6 +97,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors(FrontendCorsPolicy);
 

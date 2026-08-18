@@ -9,6 +9,9 @@ import { RegisterPage } from "./pages/RegisterPage/RegisterPage";
 import { GroupsListPage } from "./pages/GroupsListPage/GroupsListPage";
 import { CreateGroupPage } from "./pages/CreateGroupPage/CreateGroupPage";
 import { GroupDetailPage } from "./pages/GroupDetailPage/GroupDetailPage";
+import { CreatePostPage } from "./pages/CreatePostPage/CreatePostPage";
+import { PostDetailPage } from "./pages/PostDetailPage/PostDetailPage";
+import { ProfilePage } from "./pages/ProfilePage/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,9 @@ function App() {
                 <Route path="/" element={<GroupsListPage />} />
                 <Route path="/groups/new" element={<CreateGroupPage />} />
                 <Route path="/groups/:id" element={<GroupDetailPage />} />
+                <Route path="/groups/:groupId/posts/new" element={<CreatePostPage />} />
+                <Route path="/posts/:id" element={<PostDetailPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

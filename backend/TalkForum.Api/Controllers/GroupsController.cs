@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TalkForum.Api.Auth;
+using TalkForum.Infrastructure.Common;
 using TalkForum.Infrastructure.Groups;
 
 namespace TalkForum.Api.Controllers;

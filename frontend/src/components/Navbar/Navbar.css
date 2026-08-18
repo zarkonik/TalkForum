@@ -41,6 +41,10 @@
   gap: 10px;
 }
 
+.navbar__avatar-link {
+  line-height: 0;
+}
+
 .navbar__avatar {
   width: 32px;
   height: 32px;

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { MembershipRequestRow } from "../../components/MembershipRequestRow/MembershipRequestRow";
+import { PostCard } from "../../components/PostCard/PostCard";
 import {
   approveMembershipRequest,
   fetchGroup,
@@ -9,6 +10,7 @@ import {
   requestToJoinGroup,
 } from "../../groups/api";
 import { GROUP_ROLE, MEMBERSHIP_STATUS } from "../../groups/types";
+import { fetchPostsByGroup } from "../../posts/api";
 import "./GroupDetailPage.css";
 
 export function GroupDetailPage() {
@@ -23,11 +25,18 @@ export function GroupDetailPage() {
 
   const group = groupQuery.data;
   const isOwnerOrModerator = group?.viewerRole === GROUP_ROLE.OWNER || group?.viewerRole === GROUP_ROLE.MODERATOR;
+  const isApprovedMember = group?.viewerMembershipStatus === MEMBERSHIP_STATUS.APPROVED;
 
   const requestsQuery = useQuery({
     queryKey: ["groups", id, "requests"],
     queryFn: () => fetchMembershipRequests(id!),
     enabled: !!id && isOwnerOrModerator,
+  });
+
+  const postsQuery = useQuery({
+    queryKey: ["groups", id, "posts"],
+    queryFn: () => fetchPostsByGroup(id!),
+    enabled: !!id && isApprovedMember,
   });
 
   const joinMutation = useMutation({
@@ -90,6 +99,25 @@ export function GroupDetailPage() {
               onReject={() => rejectMutation.mutate(request.userId)}
             />
           ))}
+        </div>
+      )}
+
+      {isApprovedMember && (
+        <div className="group-detail__posts">
+          <div className="group-detail__posts-header">
+            <div className="group-detail__section-title">Posts</div>
+            <Link className="btn-secondary" to={`/groups/${id}/posts/new`}>
+              New post
+            </Link>
+          </div>
+
+          {postsQuery.data?.length === 0 && <p>No posts yet. Start the conversation.</p>}
+
+          <div className="group-detail__posts-list">
+            {postsQuery.data?.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
         </div>
       )}
     </div>
