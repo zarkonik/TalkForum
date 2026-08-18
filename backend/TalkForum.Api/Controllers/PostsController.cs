@@ -38,6 +38,27 @@ public class PostsController : ControllerBase
         return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
     }
 
+    [HttpPut("api/posts/{id:guid}")]
+    public async Task<ActionResult<PostSummaryDto>> Update(Guid id, UpdatePostRequest request)
+    {
+        var result = await _postsService.UpdateAsync(User.GetUserId(), id, request);
+        return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
+    [HttpDelete("api/posts/{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _postsService.DeleteAsync(User.GetUserId(), id);
+        return result.Success ? NoContent() : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
+    [HttpPost("api/posts/{id:guid}/like")]
+    public async Task<ActionResult<LikeStatusDto>> ToggleLike(Guid id)
+    {
+        var result = await _postsService.ToggleLikeAsync(User.GetUserId(), id);
+        return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
     private ActionResult ToErrorResult(ServiceErrorType errorType, string error) => errorType switch
     {
         ServiceErrorType.NotFound => NotFound(new { message = error }),

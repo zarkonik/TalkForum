@@ -32,6 +32,27 @@ public class CommentsController : ControllerBase
         return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
     }
 
+    [HttpPut("/api/comments/{id:guid}")]
+    public async Task<ActionResult<CommentDto>> Update(Guid id, UpdateCommentRequest request)
+    {
+        var result = await _commentsService.UpdateAsync(User.GetUserId(), id, request);
+        return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
+    [HttpDelete("/api/comments/{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _commentsService.DeleteAsync(User.GetUserId(), id);
+        return result.Success ? NoContent() : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
+    [HttpPost("/api/comments/{id:guid}/like")]
+    public async Task<ActionResult<LikeStatusDto>> ToggleLike(Guid id)
+    {
+        var result = await _commentsService.ToggleLikeAsync(User.GetUserId(), id);
+        return result.Success ? Ok(result.Value) : ToErrorResult(result.ErrorType, result.Error!);
+    }
+
     private ActionResult ToErrorResult(ServiceErrorType errorType, string error) => errorType switch
     {
         ServiceErrorType.NotFound => NotFound(new { message = error }),

@@ -58,7 +58,70 @@ public class CommentsService
 
         return ServiceResult<CommentDto>.Ok(new CommentDto(
             comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.AuthorId,
-            author.DisplayName, author.AvatarUrl, comment.CreatedAt));
+            author.DisplayName, author.AvatarUrl, comment.CreatedAt, comment.UpdatedAt, 0, false));
+    }
+
+    public async Task<ServiceResult<CommentDto>> UpdateAsync(Guid userId, Guid commentId, UpdateCommentRequest request)
+    {
+        var comment = await _db.Comments.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == commentId);
+        if (comment is null)
+        {
+            return ServiceResult<CommentDto>.Fail(ServiceErrorType.NotFound, "Comment not found.");
+        }
+
+        if (comment.AuthorId != userId)
+        {
+            return ServiceResult<CommentDto>.Fail(ServiceErrorType.Forbidden, "You can only edit your own comments.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            return ServiceResult<CommentDto>.Fail(ServiceErrorType.Validation, "Content is required.");
+        }
+
+        comment.Content = request.Content.Trim();
+        comment.UpdatedAt = DateTimeOffset.UtcNow;
+        await _db.SaveChangesAsync();
+
+        var likeCount = await _db.CommentLikes.CountAsync(l => l.CommentId == commentId);
+        var viewerHasLiked = await _db.CommentLikes.AnyAsync(l => l.CommentId == commentId && l.UserId == userId);
+
+        return ServiceResult<CommentDto>.Ok(new CommentDto(
+            comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.AuthorId,
+            comment.Author!.DisplayName, comment.Author.AvatarUrl, comment.CreatedAt, comment.UpdatedAt, likeCount, viewerHasLiked));
+    }
+
+    public async Task<ServiceResult> DeleteAsync(Guid userId, Guid commentId)
+    {
+        var comment = await _db.Comments.FindAsync(commentId);
+        if (comment is null)
+        {
+            return ServiceResult.Fail(ServiceErrorType.NotFound, "Comment not found.");
+        }
+
+        if (comment.AuthorId != userId)
+        {
+            return ServiceResult.Fail(ServiceErrorType.Forbidden, "You can only delete your own comments.");
+        }
+
+        var postComments = await _db.Comments.Where(c => c.PostId == comment.PostId).ToListAsync();
+        var toDelete = new List<Comment> { comment };
+        var queue = new Queue<Guid>();
+        queue.Enqueue(comment.Id);
+
+        while (queue.Count > 0)
+        {
+            var currentId = queue.Dequeue();
+            foreach (var child in postComments.Where(c => c.ParentCommentId == currentId))
+            {
+                toDelete.Add(child);
+                queue.Enqueue(child.Id);
+            }
+        }
+
+        _db.Comments.RemoveRange(toDelete);
+        await _db.SaveChangesAsync();
+        return ServiceResult.Ok();
     }
 
     public async Task<ServiceResult<IEnumerable<CommentDto>>> GetByPostAsync(Guid userId, Guid postId)
@@ -79,9 +142,44 @@ public class CommentsService
             .Where(c => c.PostId == postId)
             .OrderBy(c => c.CreatedAt)
             .Select(c => new CommentDto(
-                c.Id, c.PostId, c.ParentCommentId, c.Content, c.AuthorId, c.Author!.DisplayName, c.Author.AvatarUrl, c.CreatedAt))
+                c.Id, c.PostId, c.ParentCommentId, c.Content, c.AuthorId, c.Author!.DisplayName, c.Author.AvatarUrl, c.CreatedAt, c.UpdatedAt,
+                c.Likes.Count, c.Likes.Any(l => l.UserId == userId)))
             .ToListAsync();
 
         return ServiceResult<IEnumerable<CommentDto>>.Ok(comments);
+    }
+
+    public async Task<ServiceResult<LikeStatusDto>> ToggleLikeAsync(Guid userId, Guid commentId)
+    {
+        var comment = await _db.Comments.FindAsync(commentId);
+        if (comment is null)
+        {
+            return ServiceResult<LikeStatusDto>.Fail(ServiceErrorType.NotFound, "Comment not found.");
+        }
+
+        var post = await _db.Posts.FindAsync(comment.PostId);
+        if (post is null || !await _postsService.IsApprovedMemberAsync(post.GroupId, userId))
+        {
+            return ServiceResult<LikeStatusDto>.Fail(ServiceErrorType.Forbidden, "You must be an approved member of this group to like comments.");
+        }
+
+        var existingLike = await _db.CommentLikes.FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+        bool liked;
+
+        if (existingLike is not null)
+        {
+            _db.CommentLikes.Remove(existingLike);
+            liked = false;
+        }
+        else
+        {
+            _db.CommentLikes.Add(new CommentLike { Id = Guid.NewGuid(), CommentId = commentId, UserId = userId });
+            liked = true;
+        }
+
+        await _db.SaveChangesAsync();
+        var likeCount = await _db.CommentLikes.CountAsync(l => l.CommentId == commentId);
+
+        return ServiceResult<LikeStatusDto>.Ok(new LikeStatusDto(liked, likeCount));
     }
 }
