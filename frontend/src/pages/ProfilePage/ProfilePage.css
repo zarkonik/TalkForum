@@ -9,6 +9,12 @@
   text-align: center;
 }
 
+@media (max-width: 400px) {
+  .profile-page__card {
+    padding: 24px 18px;
+  }
+}
+
 .profile-page__avatar {
   width: 96px;
   height: 96px;

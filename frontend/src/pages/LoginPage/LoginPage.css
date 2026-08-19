@@ -16,6 +16,16 @@
   padding: 36px 32px;
 }
 
+@media (max-width: 400px) {
+  .login-page {
+    padding: 12px;
+  }
+
+  .login-page__card {
+    padding: 28px 20px;
+  }
+}
+
 .login-page__subtitle {
   color: var(--color-text-muted);
   font-size: 14px;

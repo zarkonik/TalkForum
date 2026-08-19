@@ -44,3 +44,19 @@
   display: grid;
   gap: 12px;
 }
+
+@media (max-width: 640px) {
+  .group-admin__header-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .group-admin__section {
+    padding: 20px;
+  }
+
+  .group-admin__posts-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}

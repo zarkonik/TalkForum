@@ -94,3 +94,14 @@
   background: var(--color-error-soft);
   border-color: var(--color-error);
 }
+
+@media (max-width: 480px) {
+  .group-member-row {
+    flex-wrap: wrap;
+  }
+
+  .group-member-row__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

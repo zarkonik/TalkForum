@@ -78,3 +78,14 @@
   border-color: var(--color-error);
   color: var(--color-error);
 }
+
+@media (max-width: 480px) {
+  .membership-request-row {
+    flex-wrap: wrap;
+  }
+
+  .membership-request-row__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

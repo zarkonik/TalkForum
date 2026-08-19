@@ -8,6 +8,12 @@
   padding: 36px 32px;
 }
 
+@media (max-width: 400px) {
+  .create-post__card {
+    padding: 24px 18px;
+  }
+}
+
 .create-post__form {
   display: flex;
   flex-direction: column;

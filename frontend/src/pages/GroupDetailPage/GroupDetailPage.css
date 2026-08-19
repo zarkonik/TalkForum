@@ -80,3 +80,27 @@
   display: grid;
   gap: 12px;
 }
+
+@media (max-width: 640px) {
+  .group-detail__header {
+    padding: 20px 20px;
+  }
+
+  .group-detail__top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .group-detail__actions {
+    flex-wrap: wrap;
+  }
+
+  .group-detail__section {
+    padding: 20px;
+  }
+
+  .group-detail__posts-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}

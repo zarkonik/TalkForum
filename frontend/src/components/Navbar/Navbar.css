@@ -1,10 +1,29 @@
 .navbar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 24px;
+}
+
+.navbar__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 24px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar__menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  border-radius: 50%;
+}
+
+.navbar__menu-toggle:hover {
+  background: var(--color-bg);
 }
 
 .navbar__brand {
@@ -18,7 +37,15 @@
   text-decoration: none;
 }
 
-.navbar__links {
+.navbar__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.navbar__links,
+.navbar__user {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -28,17 +55,12 @@
   color: var(--color-text-muted);
   font-weight: 600;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .navbar__link:hover {
   color: var(--color-text);
   text-decoration: none;
-}
-
-.navbar__user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .navbar__avatar-link {
@@ -64,4 +86,67 @@
   color: var(--color-primary);
   font-size: 13px;
   font-weight: 700;
+}
+
+@media (min-width: 769px) {
+  .navbar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .navbar__top {
+    width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 16px;
+  }
+
+  .navbar__menu-toggle {
+    display: flex;
+  }
+
+  .navbar__body {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .navbar__body--open {
+    display: flex;
+  }
+
+  .navbar__links,
+  .navbar__user {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+
+  .navbar__user {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .navbar__link {
+    padding: 10px 4px;
+  }
+
+  .navbar__user .btn-secondary {
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .navbar__user .navbar__avatar-link,
+  .navbar__user .notification-bell {
+    align-self: flex-start;
+  }
 }

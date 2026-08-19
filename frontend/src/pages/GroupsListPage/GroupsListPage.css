@@ -1,8 +1,13 @@
 .groups-list__toolbar {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
   max-width: 640px;
+}
+
+.groups-list__search {
+  min-width: 200px;
 }
 
 .groups-list__search {

@@ -107,3 +107,18 @@
   background: var(--color-error-soft);
   border-color: var(--color-error);
 }
+
+@media (max-width: 560px) {
+  .admin-dashboard__section {
+    padding: 20px;
+  }
+
+  .admin-dashboard__row {
+    flex-wrap: wrap;
+  }
+
+  .admin-dashboard__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -1,3 +1,9 @@
 .layout__content {
   padding: 32px 24px;
 }
+
+@media (max-width: 640px) {
+  .layout__content {
+    padding: 20px 16px;
+  }
+}
