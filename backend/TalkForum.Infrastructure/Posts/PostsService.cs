@@ -39,7 +39,8 @@ public class PostsService
             GroupId = groupId,
             AuthorId = userId,
             Title = request.Title.Trim(),
-            Content = request.Content.Trim()
+            Content = request.Content.Trim(),
+            ImageUrl = request.ImageUrl
         };
 
         _db.Posts.Add(post);
@@ -58,7 +59,7 @@ public class PostsService
         }
 
         return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
-            post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, author.DisplayName, author.AvatarUrl,
+            post.Id, post.GroupId, post.Title, post.Content, post.ImageUrl, post.AuthorId, author.DisplayName, author.AvatarUrl,
             post.CreatedAt, post.UpdatedAt, 0, 0, false));
     }
 
@@ -79,7 +80,7 @@ public class PostsService
             .Where(p => p.GroupId == groupId)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PostSummaryDto(
-                p.Id, p.GroupId, p.Title, p.Content, p.AuthorId, p.Author!.DisplayName, p.Author.AvatarUrl,
+                p.Id, p.GroupId, p.Title, p.Content, p.ImageUrl, p.AuthorId, p.Author!.DisplayName, p.Author.AvatarUrl,
                 p.CreatedAt, p.UpdatedAt, p.Comments.Count, p.Likes.Count, p.Likes.Any(l => l.UserId == userId)))
             .ToListAsync();
 
@@ -104,7 +105,7 @@ public class PostsService
         var viewerHasLiked = await _db.PostLikes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
 
         return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
-            post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, post.Author!.DisplayName, post.Author.AvatarUrl,
+            post.Id, post.GroupId, post.Title, post.Content, post.ImageUrl, post.AuthorId, post.Author!.DisplayName, post.Author.AvatarUrl,
             post.CreatedAt, post.UpdatedAt, commentCount, likeCount, viewerHasLiked));
     }
 
@@ -128,6 +129,7 @@ public class PostsService
 
         post.Title = request.Title.Trim();
         post.Content = request.Content.Trim();
+        post.ImageUrl = request.ImageUrl;
         post.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
 
@@ -136,7 +138,7 @@ public class PostsService
         var viewerHasLiked = await _db.PostLikes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
 
         return ServiceResult<PostSummaryDto>.Ok(new PostSummaryDto(
-            post.Id, post.GroupId, post.Title, post.Content, post.AuthorId, post.Author!.DisplayName, post.Author.AvatarUrl,
+            post.Id, post.GroupId, post.Title, post.Content, post.ImageUrl, post.AuthorId, post.Author!.DisplayName, post.Author.AvatarUrl,
             post.CreatedAt, post.UpdatedAt, commentCount, likeCount, viewerHasLiked));
     }
 

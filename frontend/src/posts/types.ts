@@ -3,6 +3,7 @@ export interface Post {
   groupId: string;
   title: string;
   content: string;
+  imageUrl: string | null;
   authorId: string;
   authorDisplayName: string;
   authorAvatarUrl: string | null;
@@ -18,6 +19,7 @@ export interface Comment {
   postId: string;
   parentCommentId: string | null;
   content: string;
+  imageUrl: string | null;
   authorId: string;
   authorDisplayName: string;
   authorAvatarUrl: string | null;

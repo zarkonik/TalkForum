@@ -52,7 +52,8 @@ public class CommentsService
             PostId = postId,
             AuthorId = userId,
             ParentCommentId = request.ParentCommentId,
-            Content = request.Content.Trim()
+            Content = request.Content.Trim(),
+            ImageUrl = request.ImageUrl
         };
 
         _db.Comments.Add(comment);
@@ -67,7 +68,7 @@ public class CommentsService
         }
 
         return ServiceResult<CommentDto>.Ok(new CommentDto(
-            comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.AuthorId,
+            comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.ImageUrl, comment.AuthorId,
             author.DisplayName, author.AvatarUrl, comment.CreatedAt, comment.UpdatedAt, 0, false));
     }
 
@@ -90,6 +91,7 @@ public class CommentsService
         }
 
         comment.Content = request.Content.Trim();
+        comment.ImageUrl = request.ImageUrl;
         comment.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
 
@@ -97,7 +99,7 @@ public class CommentsService
         var viewerHasLiked = await _db.CommentLikes.AnyAsync(l => l.CommentId == commentId && l.UserId == userId);
 
         return ServiceResult<CommentDto>.Ok(new CommentDto(
-            comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.AuthorId,
+            comment.Id, comment.PostId, comment.ParentCommentId, comment.Content, comment.ImageUrl, comment.AuthorId,
             comment.Author!.DisplayName, comment.Author.AvatarUrl, comment.CreatedAt, comment.UpdatedAt, likeCount, viewerHasLiked));
     }
 
@@ -169,7 +171,7 @@ public class CommentsService
             .Where(c => c.PostId == postId)
             .OrderBy(c => c.CreatedAt)
             .Select(c => new CommentDto(
-                c.Id, c.PostId, c.ParentCommentId, c.Content, c.AuthorId, c.Author!.DisplayName, c.Author.AvatarUrl, c.CreatedAt, c.UpdatedAt,
+                c.Id, c.PostId, c.ParentCommentId, c.Content, c.ImageUrl, c.AuthorId, c.Author!.DisplayName, c.Author.AvatarUrl, c.CreatedAt, c.UpdatedAt,
                 c.Likes.Count, c.Likes.Any(l => l.UserId == userId)))
             .ToListAsync();
 

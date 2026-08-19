@@ -1,6 +1,15 @@
 import { apiClient } from "../lib/apiClient";
 import type { Comment, LikeStatus, Post } from "./types";
 
+export async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await apiClient.post<{ url: string }>("/api/uploads/image", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data.url;
+}
+
 export async function fetchPostsByGroup(groupId: string): Promise<Post[]> {
   const { data } = await apiClient.get<Post[]>(`/api/groups/${groupId}/posts`);
   return data;
@@ -14,6 +23,7 @@ export async function fetchPost(id: string): Promise<Post> {
 export interface CreatePostInput {
   title: string;
   content: string;
+  imageUrl: string | null;
 }
 
 export async function createPost(groupId: string, input: CreatePostInput): Promise<Post> {
@@ -43,6 +53,7 @@ export async function fetchComments(postId: string): Promise<Comment[]> {
 export interface CreateCommentInput {
   content: string;
   parentCommentId: string | null;
+  imageUrl: string | null;
 }
 
 export async function createComment(postId: string, input: CreateCommentInput): Promise<Comment> {
@@ -50,8 +61,8 @@ export async function createComment(postId: string, input: CreateCommentInput): 
   return data;
 }
 
-export async function updateComment(id: string, content: string): Promise<Comment> {
-  const { data } = await apiClient.put<Comment>(`/api/comments/${id}`, { content });
+export async function updateComment(id: string, content: string, imageUrl: string | null): Promise<Comment> {
+  const { data } = await apiClient.put<Comment>(`/api/comments/${id}`, { content, imageUrl });
   return data;
 }
 

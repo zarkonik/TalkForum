@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { CommentForm } from "../../components/CommentForm/CommentForm";
@@ -17,8 +17,10 @@ import {
   togglePostLike,
   updateComment,
   updatePost,
+  uploadImage,
 } from "../../posts/api";
 import { resolveAvatarUrl } from "../../lib/avatar";
+import { ImageIcon } from "../../components/icons/ImageIcon";
 import "./PostDetailPage.css";
 
 export function PostDetailPage() {
@@ -31,6 +33,8 @@ export function PostDetailPage() {
   const [isEditingPost, setIsEditingPost] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
+  const [isUploadingEdit, setIsUploadingEdit] = useState(false);
 
   const postQuery = useQuery({
     queryKey: ["posts", id],
@@ -45,7 +49,7 @@ export function PostDetailPage() {
   });
 
   const commentMutation = useMutation({
-    mutationFn: (input: { content: string; parentCommentId: string | null }) =>
+    mutationFn: (input: { content: string; imageUrl: string | null; parentCommentId: string | null }) =>
       createComment(id!, input),
     onSuccess: () => {
       setReplyingToId(null);
@@ -55,7 +59,8 @@ export function PostDetailPage() {
   });
 
   const updateCommentMutation = useMutation({
-    mutationFn: ({ commentId, content }: { commentId: string; content: string }) => updateComment(commentId, content),
+    mutationFn: ({ commentId, content, imageUrl }: { commentId: string; content: string; imageUrl: string | null }) =>
+      updateComment(commentId, content, imageUrl),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts", id, "comments"] }),
   });
 
@@ -73,7 +78,7 @@ export function PostDetailPage() {
   });
 
   const updatePostMutation = useMutation({
-    mutationFn: () => updatePost(id!, { title: editTitle, content: editContent }),
+    mutationFn: () => updatePost(id!, { title: editTitle, content: editContent, imageUrl: editImageUrl }),
     onSuccess: () => {
       setIsEditingPost(false);
       queryClient.invalidateQueries({ queryKey: ["posts", id] });
@@ -104,7 +109,21 @@ export function PostDetailPage() {
   function startEditingPost() {
     setEditTitle(post!.title);
     setEditContent(post!.content);
+    setEditImageUrl(post!.imageUrl);
     setIsEditingPost(true);
+  }
+
+  async function handleEditImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingEdit(true);
+    try {
+      const url = await uploadImage(file);
+      setEditImageUrl(url);
+    } finally {
+      setIsUploadingEdit(false);
+      e.target.value = "";
+    }
   }
 
   return (
@@ -124,6 +143,14 @@ export function PostDetailPage() {
               onChange={(e) => setEditContent(e.target.value)}
               placeholder="Content"
             />
+            {editImageUrl && (
+              <div className="create-post__image-preview">
+                <img src={resolveAvatarUrl(editImageUrl)!} alt="Attached" />
+                <button type="button" className="btn-secondary" onClick={() => setEditImageUrl(null)}>
+                  Remove image
+                </button>
+              </div>
+            )}
             <div className="post-detail__edit-actions">
               <button
                 type="button"
@@ -133,6 +160,16 @@ export function PostDetailPage() {
               >
                 {updatePostMutation.isPending ? "Saving..." : "Save"}
               </button>
+              <label className="create-post__attach">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleEditImageChange}
+                  disabled={isUploadingEdit}
+                />
+                <ImageIcon />
+                {isUploadingEdit ? "Uploading..." : editImageUrl ? "Change image" : "Attach image"}
+              </label>
               <button type="button" className="btn-secondary" onClick={() => setIsEditingPost(false)}>
                 Cancel
               </button>
@@ -171,6 +208,9 @@ export function PostDetailPage() {
               {post.updatedAt && <span>(edited)</span>}
             </div>
             <p className="post-detail__content">{post.content}</p>
+            {post.imageUrl && (
+              <img className="post-detail__image" src={resolveAvatarUrl(post.imageUrl)!} alt="Attached" />
+            )}
             <div className="post-detail__like">
               <LikeButton
                 liked={post.viewerHasLiked}
@@ -197,10 +237,10 @@ export function PostDetailPage() {
             currentUserId={user?.id ?? null}
             replyingToId={replyingToId}
             onReply={setReplyingToId}
-            onSubmitReply={(content, parentCommentId) =>
-              commentMutation.mutateAsync({ content, parentCommentId })
+            onSubmitReply={(content, imageUrl, parentCommentId) =>
+              commentMutation.mutateAsync({ content, imageUrl, parentCommentId })
             }
-            onUpdate={(commentId, content) => updateCommentMutation.mutateAsync({ commentId, content })}
+            onUpdate={(commentId, content, imageUrl) => updateCommentMutation.mutateAsync({ commentId, content, imageUrl })}
             onDelete={(commentId) => {
               if (confirm("Delete this comment and its replies?")) {
                 deleteCommentMutation.mutate(commentId);
@@ -211,7 +251,9 @@ export function PostDetailPage() {
         ))}
 
         <div className="post-detail__comment-form">
-          <CommentForm onSubmit={(content) => commentMutation.mutateAsync({ content, parentCommentId: null })} />
+          <CommentForm
+            onSubmit={(content, imageUrl) => commentMutation.mutateAsync({ content, imageUrl, parentCommentId: null })}
+          />
         </div>
       </div>
     </div>

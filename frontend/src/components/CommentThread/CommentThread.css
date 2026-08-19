@@ -58,6 +58,16 @@
   white-space: pre-wrap;
 }
 
+.comment-thread__image {
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+  margin-top: 8px;
+}
+
 .comment-thread__edited {
   color: var(--color-text-muted);
   font-size: 12px;

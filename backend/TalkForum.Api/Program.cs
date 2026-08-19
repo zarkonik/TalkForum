@@ -21,6 +21,7 @@ using TalkForum.Infrastructure.Reports;
 using TalkForum.Infrastructure.Users;
 
 Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars"));
+Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
 
 var builder = WebApplication.CreateBuilder(args);
 

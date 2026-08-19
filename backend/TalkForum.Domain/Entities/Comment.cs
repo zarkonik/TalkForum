@@ -7,6 +7,7 @@ public class Comment
     public Guid AuthorId { get; set; }
     public Guid? ParentCommentId { get; set; }
     public string Content { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; }
 

@@ -1,14 +1,15 @@
 namespace TalkForum.Infrastructure.Posts;
 
-public record CreatePostRequest(string Title, string Content);
+public record CreatePostRequest(string Title, string Content, string? ImageUrl);
 
-public record UpdatePostRequest(string Title, string Content);
+public record UpdatePostRequest(string Title, string Content, string? ImageUrl);
 
 public record PostSummaryDto(
     Guid Id,
     Guid GroupId,
     string Title,
     string Content,
+    string? ImageUrl,
     Guid AuthorId,
     string AuthorDisplayName,
     string? AuthorAvatarUrl,
@@ -18,15 +19,16 @@ public record PostSummaryDto(
     int LikeCount,
     bool ViewerHasLiked);
 
-public record CreateCommentRequest(string Content, Guid? ParentCommentId);
+public record CreateCommentRequest(string Content, Guid? ParentCommentId, string? ImageUrl);
 
-public record UpdateCommentRequest(string Content);
+public record UpdateCommentRequest(string Content, string? ImageUrl);
 
 public record CommentDto(
     Guid Id,
     Guid PostId,
     Guid? ParentCommentId,
     string Content,
+    string? ImageUrl,
     Guid AuthorId,
     string AuthorDisplayName,
     string? AuthorAvatarUrl,

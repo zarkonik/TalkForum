@@ -28,6 +28,16 @@
   overflow: hidden;
 }
 
+.post-card__image {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  margin-top: 12px;
+}
+
 .post-card__meta {
   display: flex;
   align-items: center;

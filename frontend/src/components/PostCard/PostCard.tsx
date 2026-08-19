@@ -21,6 +21,9 @@ export function PostCard({ post }: { post: Post }) {
     <Link to={`/posts/${post.id}`} className="post-card">
       <h3 className="post-card__title">{post.title}</h3>
       <p className="post-card__content">{post.content}</p>
+      {post.imageUrl && (
+        <img className="post-card__image" src={resolveAvatarUrl(post.imageUrl)!} alt="" />
+      )}
       <div className="post-card__meta">
         {avatarUrl ? (
           <img className="post-card__avatar" src={avatarUrl} alt={post.authorDisplayName} />
