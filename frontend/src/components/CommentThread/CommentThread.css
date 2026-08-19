@@ -10,6 +10,7 @@
 .comment-thread__row {
   display: flex;
   gap: 10px;
+  transition: margin-left 0.15s ease;
 }
 
 .comment-thread__avatar {
@@ -130,10 +131,16 @@
   gap: 8px;
 }
 
-.comment-thread__replies {
+.comment-thread__children {
   margin-top: 10px;
-  margin-left: 42px;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.comment-thread__children--flat {
+  padding-left: 0;
+  border-left: none;
 }

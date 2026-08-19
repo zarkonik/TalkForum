@@ -6,6 +6,7 @@ import type { Comment } from "../../posts/types";
 import { resolveAvatarUrl } from "../../lib/avatar";
 import { uploadImage } from "../../posts/api";
 import { ImageIcon } from "../icons/ImageIcon";
+import { EmojiPicker } from "../EmojiPicker/EmojiPicker";
 import { REPORT_TARGET_TYPE } from "../../reports/types";
 import "./CommentThread.css";
 
@@ -21,22 +22,7 @@ interface CommentThreadProps {
   onToggleLike: (commentId: string) => void;
 }
 
-function collectReplies(rootId: string, allComments: Comment[]): Comment[] {
-  const result: Comment[] = [];
-  const queue = [rootId];
-
-  while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    for (const candidate of allComments) {
-      if (candidate.parentCommentId === currentId) {
-        result.push(candidate);
-        queue.push(candidate.id);
-      }
-    }
-  }
-
-  return result.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-}
+const MAX_INDENT_DEPTH = 5;
 
 export function CommentThread({
   comment,
@@ -49,9 +35,6 @@ export function CommentThread({
   onDelete,
   onToggleLike,
 }: CommentThreadProps) {
-  const commentsById = new Map(allComments.map((c) => [c.id, c]));
-  const replies = collectReplies(comment.id, allComments);
-
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
@@ -89,11 +72,17 @@ export function CommentThread({
     }
   }
 
-  function renderComment(c: Comment, replyToAuthor: string | null) {
+  function renderComment(c: Comment, depth: number) {
     const avatarUrl = resolveAvatarUrl(c.authorAvatarUrl);
     const isReplying = replyingToId === c.id;
     const isEditing = editingId === c.id;
     const isAuthor = currentUserId !== null && currentUserId === c.authorId;
+    const children = allComments
+      .filter((x) => x.parentCommentId === c.id)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const replyToAuthor = c.parentCommentId
+      ? allComments.find((x) => x.id === c.parentCommentId)?.authorDisplayName ?? null
+      : null;
 
     return (
       <div className="comment-thread__item" key={c.id}>
@@ -142,6 +131,7 @@ export function CommentThread({
                     <ImageIcon />
                     {isUploadingEdit ? "Uploading..." : editImageUrl ? "Change image" : "Attach image"}
                   </label>
+                  <EmojiPicker onSelect={(emoji) => setEditContent((prev) => prev + emoji)} />
                   <button type="button" className="btn-secondary" onClick={() => setEditingId(null)}>
                     Cancel
                   </button>
@@ -195,21 +185,17 @@ export function CommentThread({
                 />
               </div>
             )}
+
+            {children.length > 0 && (
+              <div className={depth < MAX_INDENT_DEPTH ? "comment-thread__children" : "comment-thread__children comment-thread__children--flat"}>
+                {children.map((child) => renderComment(child, depth + 1))}
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="comment-thread">
-      {renderComment(comment, null)}
-
-      {replies.length > 0 && (
-        <div className="comment-thread__replies">
-          {replies.map((reply) => renderComment(reply, commentsById.get(reply.parentCommentId!)?.authorDisplayName ?? null))}
-        </div>
-      )}
-    </div>
-  );
+  return <div className="comment-thread">{renderComment(comment, 0)}</div>;
 }

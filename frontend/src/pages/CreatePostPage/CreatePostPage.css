@@ -54,6 +54,13 @@
   object-fit: cover;
 }
 
+.create-post__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .create-post__attach {
   display: inline-flex;
   align-items: center;

@@ -2,6 +2,7 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 import { uploadImage } from "../../posts/api";
 import { resolveAvatarUrl } from "../../lib/avatar";
 import { ImageIcon } from "../icons/ImageIcon";
+import { EmojiPicker } from "../EmojiPicker/EmojiPicker";
 import "./CommentForm.css";
 
 interface CommentFormProps {
@@ -79,6 +80,7 @@ export function CommentForm({ onSubmit, onCancel, placeholder = "Write a comment
           <ImageIcon />
           {isUploading ? "Uploading..." : imageUrl ? "Change image" : "Attach image"}
         </label>
+        <EmojiPicker onSelect={(emoji) => setContent((prev) => prev + emoji)} />
         {onCancel && (
           <button type="button" className="btn-secondary" onClick={onCancel}>
             Cancel

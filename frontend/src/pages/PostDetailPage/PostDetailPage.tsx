@@ -21,6 +21,7 @@ import {
 } from "../../posts/api";
 import { resolveAvatarUrl } from "../../lib/avatar";
 import { ImageIcon } from "../../components/icons/ImageIcon";
+import { EmojiPicker } from "../../components/EmojiPicker/EmojiPicker";
 import "./PostDetailPage.css";
 
 export function PostDetailPage() {
@@ -170,6 +171,7 @@ export function PostDetailPage() {
                 <ImageIcon />
                 {isUploadingEdit ? "Uploading..." : editImageUrl ? "Change image" : "Attach image"}
               </label>
+              <EmojiPicker onSelect={(emoji) => setEditContent((prev) => prev + emoji)} />
               <button type="button" className="btn-secondary" onClick={() => setIsEditingPost(false)}>
                 Cancel
               </button>

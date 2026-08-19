@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createPost, uploadImage } from "../../posts/api";
 import { resolveAvatarUrl } from "../../lib/avatar";
 import { ImageIcon } from "../../components/icons/ImageIcon";
+import { EmojiPicker } from "../../components/EmojiPicker/EmojiPicker";
 import "./CreatePostPage.css";
 
 export function CreatePostPage() {
@@ -71,11 +72,14 @@ export function CreatePostPage() {
           </div>
         )}
 
-        <label className="create-post__attach">
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} disabled={isUploading} />
-          <ImageIcon />
-          {isUploading ? "Uploading..." : imageUrl ? "Change image" : "Attach image"}
-        </label>
+        <div className="create-post__toolbar">
+          <label className="create-post__attach">
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} disabled={isUploading} />
+            <ImageIcon />
+            {isUploading ? "Uploading..." : imageUrl ? "Change image" : "Attach image"}
+          </label>
+          <EmojiPicker onSelect={(emoji) => setContent((prev) => prev + emoji)} />
+        </div>
 
         {error && <p className="form-error">{error}</p>}
         <button type="submit" className="btn-primary" disabled={mutation.isPending || isUploading}>
