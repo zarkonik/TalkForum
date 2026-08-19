@@ -60,6 +60,7 @@ public class NotificationsService
             NotificationType.GroupMembershipApproved => $"{actor} approved your request to join {n.Group?.Name}.",
             NotificationType.GroupMembershipRejected => $"{actor} rejected your request to join {n.Group?.Name}.",
             NotificationType.PostCreatedInGroup => $"{actor} created a new post in {n.Group?.Name}.",
+            NotificationType.GroupJoinRequested => $"{actor} requested to join {n.Group?.Name}.",
             _ => $"{actor} did something."
         };
     }

@@ -10,6 +10,8 @@ export function getNotificationLink(n: Notification): string | null {
     case NOTIFICATION_TYPE.GROUP_MEMBERSHIP_APPROVED:
     case NOTIFICATION_TYPE.GROUP_MEMBERSHIP_REJECTED:
       return n.groupId ? `/groups/${n.groupId}` : null;
+    case NOTIFICATION_TYPE.GROUP_JOIN_REQUESTED:
+      return n.groupId ? `/groups/${n.groupId}/admin` : null;
     default:
       return null;
   }

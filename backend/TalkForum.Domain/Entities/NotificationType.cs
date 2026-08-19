@@ -7,5 +7,6 @@ public enum NotificationType
     CommentReplied = 2,
     GroupMembershipApproved = 3,
     GroupMembershipRejected = 4,
-    PostCreatedInGroup = 5
+    PostCreatedInGroup = 5,
+    GroupJoinRequested = 6
 }

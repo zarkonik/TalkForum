@@ -5,6 +5,7 @@ export const NOTIFICATION_TYPE = {
   GROUP_MEMBERSHIP_APPROVED: 3,
   GROUP_MEMBERSHIP_REJECTED: 4,
   POST_CREATED_IN_GROUP: 5,
+  GROUP_JOIN_REQUESTED: 6,
 } as const;
 
 export interface Notification {

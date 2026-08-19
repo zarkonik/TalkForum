@@ -192,6 +192,17 @@ public class GroupsService
         });
 
         await _db.SaveChangesAsync();
+
+        var ownerUserId = await _db.GroupMemberships
+            .Where(m => m.GroupId == groupId && m.Role == GroupRole.Owner && m.Status == MembershipStatus.Approved)
+            .Select(m => (Guid?)m.UserId)
+            .FirstOrDefaultAsync();
+
+        if (ownerUserId is not null)
+        {
+            await _notificationsService.NotifyAsync(ownerUserId.Value, userId, NotificationType.GroupJoinRequested, groupId);
+        }
+
         return ServiceResult.Ok();
     }
 
