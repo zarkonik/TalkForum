@@ -32,8 +32,10 @@ services:
       Email__FromName: TalkForum
       Email__FrontendBaseUrl: https://${DOMAIN}
       Cors__AllowedOrigins__0: https://${DOMAIN}
+      DataProtection__KeysPath: /keys
     volumes:
       - avatars_data:/app/wwwroot/avatars
+      - dataprotection_keys:/keys
 
   web:
     build:
@@ -57,5 +59,6 @@ services:
 volumes:
   db_data:
   avatars_data:
+  dataprotection_keys:
   caddy_data:
   caddy_config:

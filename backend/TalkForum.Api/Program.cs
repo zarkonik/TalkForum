@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,12 @@ builder.Services.AddOpenApi();
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("Connection string 'Default' not configured.");
 
-builder.Services.AddDataProtection();
+var dataProtectionBuilder = builder.Services.AddDataProtection();
+var keysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrEmpty(keysPath))
+{
+    dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
